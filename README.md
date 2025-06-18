@@ -1,19 +1,29 @@
-# all-in-mcp MCP server
+# All-in-MCP
 
-MCP server providing daily-use utility functions for common tasks like text processing, encoding/decoding, hashing, and system information.
+An MCP (Model Context Protocol) server that provides daily-use utility functions, including academic paper search capabilities.
 
 ## Features
 
-This MCP server provides the following daily utility tools:
+### Daily Utilities
 
-## Installation
+- **Text Processing**: Base64 encoding/decoding
+- **Academic Research**: IACR ePrint Archive paper search, download, and reading
+
+### Paper Search Capabilities
+
+- Search academic papers from IACR ePrint Archive
+- Download PDF files
+- Extract and read text content from papers
+- Metadata extraction (authors, publication dates, abstracts)
+
+## Quick Start
 
 ### Prerequisites
 
 - Python 3.12 or higher
 - UV package manager
 
-### Setup
+### Installation
 
 1. Clone or download this project
 2. Install dependencies:
@@ -27,8 +37,6 @@ This MCP server provides the following daily utility tools:
    uv sync --extra system
    ```
 
-## Usage
-
 ### Running the Server
 
 ```bash
@@ -38,7 +46,19 @@ uv run all-in-mcp
 ### Integration with MCP Clients
 
 Add this server to your MCP client configuration. The server runs using stdio transport.
-Detail show on [integration](./INTEGRATION.md).
+See detailed integration guide in [`docs/INTEGRATION.md`](docs/INTEGRATION.md).
+
+## Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+- **[Installation Guide](docs/installation.md)** - Detailed setup instructions
+- **[API Reference](docs/api.md)** - Complete API documentation
+- **[Examples](docs/examples.md)** - Usage examples and demos
+- **[Development Guide](docs/development.md)** - Contributing and development setup
+- **[Configuration](docs/configuration.md)** - Server configuration options
+- **[IACR Integration](docs/iacr.md)** - IACR ePrint Archive details
+- **[Testing](docs/tests.md)** - Test documentation and guidelines
 
 Example configuration for Claude Desktop:
 
