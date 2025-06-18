@@ -6,34 +6,6 @@ MCP server providing daily-use utility functions for common tasks like text proc
 
 This MCP server provides the following daily utility tools:
 
-### Text Processing & Encoding
-
-- **encode-base64**: Encode text to Base64 format
-- **decode-base64**: Decode Base64 encoded text
-- **url-encode**: URL encode text for safe transmission
-- **url-decode**: Decode URL encoded text
-
-### Cryptographic Functions
-
-- **hash-text**: Generate MD5, SHA1, or SHA256 hashes of text
-
-### Data Formatting
-
-- **format-json**: Format and validate JSON text with proper indentation
-
-### Date & Time
-
-- **timestamp-now**: Get current timestamp in Unix, ISO, or human-readable format
-
-### System Information
-
-- **system-info**: Retrieve system information (platform, Python version, CPU, memory, disk)
-
-### Text Analysis
-
-- **regex-match**: Test regex patterns against text with various flags
-- **count-words**: Count words, characters, and lines in text
-
 ## Installation
 
 ### Prerequisites
@@ -66,6 +38,7 @@ uv run all-in-mcp
 ### Integration with MCP Clients
 
 Add this server to your MCP client configuration. The server runs using stdio transport.
+Detail show on [integration](./INTEGRATION.md).
 
 Example configuration for Claude Desktop:
 
@@ -111,8 +84,8 @@ Example configuration for Claude Desktop:
 
 ### Project Structure
 
-- `src/daily_utilities_mcp/server.py`: Main MCP server implementation
-- `src/daily_utilities_mcp/__init__.py`: Package initialization
+- `src/all_in_mcp/server.py`: Main MCP server implementation
+- `src/all_in_mcp/__init__.py`: Package initialization
 - `pyproject.toml`: Project configuration and dependencies
 
 ### Adding New Tools
