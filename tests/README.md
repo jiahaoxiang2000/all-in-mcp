@@ -29,6 +29,7 @@ uv run pytest -v
 ## Test Coverage
 
 The tests cover:
+
 - Basic Base64 encoding functionality
 - Edge cases (empty strings, special characters, Unicode)
 - Error handling (unknown tools)

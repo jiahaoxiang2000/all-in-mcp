@@ -15,11 +15,11 @@ class TestBase64Encoding:
         # Test data
         text = "Hello, World!"
         expected_encoded = base64.b64encode(text.encode("utf-8")).decode("utf-8")
-        
+
         # Call the function
         result = await handle_call_tool("encode-base64", {"text": text})
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
@@ -31,11 +31,11 @@ class TestBase64Encoding:
         # Test data
         text = ""
         expected_encoded = base64.b64encode(text.encode("utf-8")).decode("utf-8")
-        
+
         # Call the function
         result = await handle_call_tool("encode-base64", {"text": text})
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
@@ -47,11 +47,11 @@ class TestBase64Encoding:
         # Test data
         text = "Hello! @#$%^&*()_+ 🌟"
         expected_encoded = base64.b64encode(text.encode("utf-8")).decode("utf-8")
-        
+
         # Call the function
         result = await handle_call_tool("encode-base64", {"text": text})
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
@@ -63,11 +63,11 @@ class TestBase64Encoding:
         # Test data
         text = "Line 1\nLine 2\nLine 3"
         expected_encoded = base64.b64encode(text.encode("utf-8")).decode("utf-8")
-        
+
         # Call the function
         result = await handle_call_tool("encode-base64", {"text": text})
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
@@ -79,7 +79,7 @@ class TestBase64Encoding:
         # Call the function with no arguments
         result = await handle_call_tool("encode-base64", {})
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
@@ -93,7 +93,7 @@ class TestBase64Encoding:
         # Call the function with None arguments
         result = await handle_call_tool("encode-base64", None)
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
@@ -107,7 +107,7 @@ class TestBase64Encoding:
         # Call with unknown tool name
         result = await handle_call_tool("unknown-tool", {"text": "test"})
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
@@ -120,11 +120,11 @@ class TestBase64Encoding:
         # Test data - large text
         text = "A" * 1000  # 1000 character string
         expected_encoded = base64.b64encode(text.encode("utf-8")).decode("utf-8")
-        
+
         # Call the function
         result = await handle_call_tool("encode-base64", {"text": text})
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
@@ -136,11 +136,11 @@ class TestBase64Encoding:
         # Test data with various Unicode characters
         text = "Hello 世界 🌍 Ñiño café"
         expected_encoded = base64.b64encode(text.encode("utf-8")).decode("utf-8")
-        
+
         # Call the function
         result = await handle_call_tool("encode-base64", {"text": text})
         result_list = list(result)  # Convert to list to enable indexing
-        
+
         # Assertions
         assert len(result_list) == 1
         assert isinstance(result_list[0], types.TextContent)
