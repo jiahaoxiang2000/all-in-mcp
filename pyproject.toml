@@ -1,0 +1,21 @@
+[project]
+name = "all-in-mcp"
+version = "0.1.0"
+description = "MCP server providing daily-use utility functions"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["mcp>=1.9.4"]
+
+[project.optional-dependencies]
+system = ["psutil>=5.9.0"]
+all = ["psutil>=5.9.0"]
+[[project.authors]]
+name = "isomo"
+email = "jiahaoxiang2000@gmail.com"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+all-in-mcp = "all_in_mcp:main"

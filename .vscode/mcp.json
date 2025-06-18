@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "all-in-mcp": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "all-in-mcp"]
+    }
+  }
+}
