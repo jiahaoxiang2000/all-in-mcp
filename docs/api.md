@@ -2,37 +2,6 @@
 
 Complete API documentation for all tools available in the All-in-MCP server.
 
-## Base64 Utilities
-
-### encode-base64
-
-Encode text to Base64 format.
-
-**Parameters:**
-
-- `text` (string, required): Text to encode
-
-**Returns:**
-
-- Base64 encoded string
-
-**Example:**
-
-```json
-{
-  "name": "encode-base64",
-  "arguments": {
-    "text": "Hello, World!"
-  }
-}
-```
-
-**Response:**
-
-```
-Base64 encoded: SGVsbG8sIFdvcmxkIQ==
-```
-
 ## Academic Paper Search
 
 ### search-iacr-papers
