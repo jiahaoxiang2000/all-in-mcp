@@ -1,9 +1,7 @@
-import os
-from typing import List, Dict
-from mcp.server.models import InitializationOptions
+import mcp.server.stdio
 import mcp.types as types
 from mcp.server import NotificationOptions, Server
-import mcp.server.stdio
+from mcp.server.models import InitializationOptions
 
 # Import IACR searcher
 from .academic_platforms.iacr import IACRSearcher
@@ -149,7 +147,7 @@ async def handle_call_tool(
 
             result = iacr_searcher.download_pdf(paper_id, save_path)
 
-            if result.startswith("Error") or result.startswith("Failed"):
+            if result.startswith(("Error", "Failed")):
                 return [
                     types.TextContent(type="text", text=f"Download failed: {result}")
                 ]
@@ -190,9 +188,7 @@ async def handle_call_tool(
             raise ValueError(f"Unknown tool: {name}")
 
     except Exception as e:
-        return [
-            types.TextContent(type="text", text=f"Error executing {name}: {str(e)}")
-        ]
+        return [types.TextContent(type="text", text=f"Error executing {name}: {e!s}")]
 
 
 async def main():

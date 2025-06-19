@@ -1,6 +1,6 @@
 # all_in_mcp/academic_platforms/base.py
-from typing import List
 from abc import ABC, abstractmethod
+
 from ..paper import Paper
 
 
@@ -8,7 +8,7 @@ class PaperSource(ABC):
     """Abstract base class for paper sources"""
 
     @abstractmethod
-    def search(self, query: str, **kwargs) -> List[Paper]:
+    def search(self, query: str, **kwargs) -> list[Paper]:
         """Search for papers based on query"""
         raise NotImplementedError
 

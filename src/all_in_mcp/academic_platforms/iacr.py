@@ -1,13 +1,14 @@
 # all_in_mcp/academic_platforms/iacr.py
-from typing import List, Optional
-from datetime import datetime
-import requests
-from bs4 import BeautifulSoup
-import time
-import random
 import logging
 import os
+import random
+from datetime import datetime
+from typing import ClassVar
+
+import requests
+from bs4 import BeautifulSoup
 from pypdf import PdfReader
+
 from ..paper import Paper
 from .base import PaperSource
 
@@ -19,7 +20,7 @@ class IACRSearcher(PaperSource):
 
     IACR_SEARCH_URL = "https://eprint.iacr.org/search"
     IACR_BASE_URL = "https://eprint.iacr.org"
-    BROWSERS = [
+    BROWSERS: ClassVar[list[str]] = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
@@ -39,7 +40,7 @@ class IACRSearcher(PaperSource):
             }
         )
 
-    def _parse_date(self, date_str: str) -> Optional[datetime]:
+    def _parse_date(self, date_str: str) -> datetime | None:
         """Parse date from IACR format (e.g., '2025-06-02')"""
         try:
             return datetime.strptime(date_str.strip(), "%Y-%m-%d")
@@ -47,7 +48,7 @@ class IACRSearcher(PaperSource):
             logger.warning(f"Could not parse date: {date_str}")
             return None
 
-    def _parse_paper(self, item, fetch_details: bool = True) -> Optional[Paper]:
+    def _parse_paper(self, item, fetch_details: bool = True) -> Paper | None:
         """Parse single paper entry from IACR HTML and optionally fetch detailed info"""
         try:
             # Extract paper ID from the search result
@@ -141,7 +142,7 @@ class IACRSearcher(PaperSource):
 
     def search(
         self, query: str, max_results: int = 10, fetch_details: bool = True
-    ) -> List[Paper]:
+    ) -> list[Paper]:
         """
         Search IACR ePrint Archive
 
@@ -289,7 +290,7 @@ class IACRSearcher(PaperSource):
             logger.error(f"Read paper error: {e}")
             return f"Error reading paper: {e}"
 
-    def get_paper_details(self, paper_id: str) -> Optional[Paper]:
+    def get_paper_details(self, paper_id: str) -> Paper | None:
         """
         Fetch detailed information for a specific IACR paper
 
@@ -367,12 +368,12 @@ class IACRSearcher(PaperSource):
             try:
                 keyword_elements = soup.select("a.badge.bg-secondary.keyword")
                 keywords = [elem.get_text(strip=True) for elem in keyword_elements]
-            except:
+            except Exception:
                 keywords = []
 
             # Find history entries
             history_found = False
-            for i, line in enumerate(lines):
+            for _i, line in enumerate(lines):
                 if "History" in line and ":" not in line:
                     history_found = True
                     continue

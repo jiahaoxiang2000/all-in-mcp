@@ -1,7 +1,6 @@
 # all_in_mcp/paper.py
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Dict, Optional
 
 
 @dataclass
@@ -11,7 +10,7 @@ class Paper:
     # Core fields (required, but allows empty values or defaults)
     paper_id: str  # Unique identifier (e.g., arXiv ID, PMID, DOI)
     title: str  # Paper title
-    authors: List[str]  # List of author names
+    authors: list[str]  # List of author names
     abstract: str  # Abstract text
     doi: str  # Digital Object Identifier
     published_date: datetime  # Publication date
@@ -20,12 +19,12 @@ class Paper:
     source: str  # Source platform (e.g., 'arxiv', 'pubmed')
 
     # Optional fields
-    updated_date: Optional[datetime] = None  # Last updated date
-    categories: Optional[List[str]] = None  # Subject categories
-    keywords: Optional[List[str]] = None  # Keywords
+    updated_date: datetime | None = None  # Last updated date
+    categories: list[str] | None = None  # Subject categories
+    keywords: list[str] | None = None  # Keywords
     citations: int = 0  # Citation count
-    references: Optional[List[str]] = None  # List of reference IDs/DOIs
-    extra: Optional[Dict] = None  # Source-specific extra metadata
+    references: list[str] | None = None  # List of reference IDs/DOIs
+    extra: dict | None = None  # Source-specific extra metadata
 
     def __post_init__(self):
         """Post-initialization to handle default values"""
@@ -40,7 +39,7 @@ class Paper:
         if self.extra is None:
             self.extra = {}
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert paper to dictionary format for serialization"""
         return {
             "paper_id": self.paper_id,

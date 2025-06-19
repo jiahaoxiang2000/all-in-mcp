@@ -1,9 +1,33 @@
 [project]
 name = "all-in-mcp"
 version = "0.1.0"
-description = "MCP server providing all functions"
+description = "An MCP (Model Context Protocol) server providing daily-use utility functions and academic paper search capabilities"
 readme = "README.md"
-requires-python = ">=3.12"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "isomo", email = "jiahaoxiang2000@gmail.com" }]
+keywords = [
+    "mcp",
+    "model-context-protocol",
+    "utilities",
+    "academic",
+    "papers",
+    "iacr",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: General",
+]
 dependencies = [
     "mcp>=1.9.4",
     "requests>=2.31.0",
@@ -13,17 +37,99 @@ dependencies = [
     "httpx>=0.24.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/jiahaoxiang2000/all-in-mcp"
+Repository = "https://github.com/jiahaoxiang2000/all-in-mcp"
+Documentation = "https://github.com/jiahaoxiang2000/all-in-mcp/tree/main/docs"
+Issues = "https://github.com/jiahaoxiang2000/all-in-mcp/issues"
+
 [project.optional-dependencies]
 system = ["psutil>=5.9.0"]
 all = ["psutil>=5.9.0"]
-dev = ["pytest>=8.0.0", "pytest-asyncio>=0.21.0"]
-[[project.authors]]
-name = "isomo"
-email = "jiahaoxiang2000@gmail.com"
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "build>=1.0.0",
+    "twine>=4.0.0",
+]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/all_in_mcp"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/README.md", "/pyproject.toml", "/docs"]
+
 [project.scripts]
 all-in-mcp = "all_in_mcp:main"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "N",
+    "UP",
+    "B",
+    "A",
+    "C4",
+    "ICN",
+    "PIE",
+    "PYI",
+    "RSE",
+    "RUF",
+]
+ignore = ["E501"] # Line too long (handled by formatter)
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = "--verbose --tb=short"
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src/all_in_mcp"]
+omit = ["tests/*", "scripts/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+]

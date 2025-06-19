@@ -1,0 +1,24 @@
+# Include the README and license files
+include README.md
+include LICENSE*
+
+# Include documentation
+recursive-include docs *.md
+
+# Include example files
+recursive-include examples *.py
+
+# Include test files for development
+recursive-include tests *.py
+
+# Include configuration files
+include pyproject.toml
+include pytest.ini
+
+# Exclude cache and build artifacts
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude *.egg-info
+prune downloads
