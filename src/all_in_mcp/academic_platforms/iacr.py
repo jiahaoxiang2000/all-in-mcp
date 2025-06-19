@@ -342,63 +342,10 @@ class IACRSearcher(PaperSource):
             # Extract abstract using multiple strategies
             abstract = ""
 
-            # Strategy 1: Look for paragraph with white-space: pre-wrap style (current method)
+            # Look for paragraph with white-space: pre-wrap style (current method)
             abstract_p = soup.find("p", style="white-space: pre-wrap;")
             if abstract_p:
                 abstract = abstract_p.get_text(strip=True)
-
-            # Strategy 2: If no abstract found, look for text after "Abstract" heading
-            if not abstract:
-                for element in soup.find_all(["strong", "h4", "h5"]):
-                    if "abstract" in element.get_text().lower():
-                        # Find the next paragraph or div element
-                        next_elem = element.find_next(["p", "div"])
-                        if next_elem:
-                            candidate_text = next_elem.get_text(strip=True)
-                            if len(candidate_text) > 100:  # Reasonable abstract length
-                                abstract = candidate_text
-                                break
-
-            # Strategy 3: If still no abstract, find the largest meaningful paragraph
-            if not abstract:
-                largest_paragraph = ""
-                for p in soup.find_all("p"):
-                    text = p.get_text(strip=True)
-                    # Skip if it's metadata, navigation, or very short
-                    if (
-                        len(text) > len(largest_paragraph)
-                        and len(text) > 200
-                        and "last updated" not in text.lower()
-                        and "publication info" not in text.lower()
-                        and "history" not in text.lower()
-                        and "keywords" not in text.lower()
-                    ):
-                        largest_paragraph = text
-
-                if largest_paragraph:
-                    abstract = largest_paragraph
-
-            # Strategy 4: Look for div or section that might contain abstract
-            if not abstract:
-                for div in soup.find_all(["div", "section"]):
-                    text = div.get_text(strip=True)
-                    # Look for content that starts like an abstract
-                    if (
-                        len(text) > 200
-                        and len(text) < 3000  # Not too long to be the entire paper
-                        and any(
-                            word in text.lower()[:100]
-                            for word in [
-                                "we present",
-                                "this paper",
-                                "we propose",
-                                "we introduce",
-                                "in this work",
-                            ]
-                        )
-                    ):
-                        abstract = text
-                        break
 
             # Extract metadata using a simpler, safer approach
             publication_info = ""

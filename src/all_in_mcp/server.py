@@ -148,7 +148,7 @@ async def handle_call_tool(
                 if paper.keywords:
                     result_text += f"   - Keywords: {', '.join(paper.keywords)}\n"
                 if paper.abstract:
-                    result_text += f"   - Abstract: {paper.abstract[:200]}...\n"
+                    result_text += f"   - Abstract: {paper.abstract}n"
                 result_text += "\n"
 
             return [types.TextContent(type="text", text=result_text)]
