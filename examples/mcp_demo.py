@@ -25,15 +25,8 @@ async def demo_mcp_server():
 
     print(f"\nTotal tools available: {len(tools)}")
 
-    # 2. Demo Base64 encoding
-    print(f"\n2. Testing Base64 encoding:")
-    result = await handle_call_tool("encode-base64", {"text": "Hello, MCP World!"})
-    result_list = list(result)
-    if result_list and isinstance(result_list[0], types.TextContent):
-        print(f"   Result: {result_list[0].text}")
-
-    # 3. Demo IACR search
-    print(f"\n3. Testing IACR paper search:")
+    # 2. Demo IACR search
+    print(f"\n2. Testing IACR paper search:")
     result = await handle_call_tool(
         "search-iacr-papers", {"query": "zero knowledge", "max_results": 3}
     )
@@ -41,8 +34,8 @@ async def demo_mcp_server():
     if result_list and isinstance(result_list[0], types.TextContent):
         print(f"   Found papers: {result_list[0].text[:500]}...")
 
-    # 4. Demo IACR download (using a known paper ID)
-    print(f"\n4. Testing IACR paper download:")
+    # 3. Demo IACR download (using a known paper ID)
+    print(f"\n3. Testing IACR paper download:")
     # Use a typical IACR paper ID format for demo
     demo_paper_id = "2023/1234"  # This might not exist, but shows the format
     result = await handle_call_tool(
@@ -52,8 +45,8 @@ async def demo_mcp_server():
     if result_list and isinstance(result_list[0], types.TextContent):
         print(f"   Download result: {result_list[0].text}")
 
-    # 5. Demo IACR read
-    print(f"\n5. Testing IACR paper reading:")
+    # 4. Demo IACR read
+    print(f"\n4. Testing IACR paper reading:")
     result = await handle_call_tool(
         "read-iacr-paper", {"paper_id": demo_paper_id, "save_path": "./downloads"}
     )
