@@ -4,21 +4,18 @@ This repository includes git hooks that automatically create git tags when the v
 
 ## How It Works
 
-The git hooks consist of two scripts:
+The git hooks consist of two simple scripts:
 
 ### 1. Pre-commit Hook (`.git/hooks/pre-commit`)
 
 - **Triggers**: Before each commit
-- **Function**: Detects if `pyproject.toml` is being modified
-- **Validation**:
-  - Checks if the version follows semantic versioning format (X.Y.Z)
-  - Ensures the tag doesn't already exist
-  - Stores the new version for the post-commit hook
+- **Function**: Validates version format in `pyproject.toml`
+- **Validation**: Ensures version follows semantic versioning format (X.Y.Z)
 
 ### 2. Post-commit Hook (`.git/hooks/post-commit`)
 
 - **Triggers**: After a successful commit
-- **Function**: Creates a git tag if a version change was detected
+- **Function**: Detects version changes and creates git tags automatically
 - **Tag Format**: `v{version}` (e.g., `v0.1.2`)
 - **Tag Message**: `Release version {version}`
 
@@ -49,9 +46,8 @@ The git hooks consist of two scripts:
 
 ```bash
 $ git commit -m "Bump version to 0.1.3"
-pyproject.toml is being modified, checking for version changes...
-Version change detected: 0.1.2 -> 0.1.3
-Will create tag v0.1.3 after successful commit
+pyproject.toml is being modified, validating version format...
+Version format validated: 0.1.3
 Creating git tag: v0.1.3
 ✅ Successfully created tag: v0.1.3
 📝 Tag message: Release version 0.1.3
@@ -91,22 +87,17 @@ git push --tags
 
 ### Tag Already Exists Error
 
+This error is now handled automatically - if a tag already exists, the hook will skip creating a duplicate tag and just inform you.
+
 ```text
-Warning: Tag v0.1.3 already exists!
-Please use a different version number or delete the existing tag.
-```
-
-**Solution**: Either increment the version number or delete the existing tag:
-
-```bash
-git tag -d v0.1.3  # Delete local tag
-git push origin --delete v0.1.3  # Delete remote tag (if pushed)
+Tag v0.1.3 already exists, skipping tag creation
 ```
 
 ### Invalid Version Format Error
 
 ```text
 Error: Version format should be X.Y.Z (e.g., 0.1.1)
+Found version: 0.1.1-beta
 ```
 
 **Solution**: Use semantic versioning format (e.g., `1.0.0`, `0.2.5`, `2.1.3`)
