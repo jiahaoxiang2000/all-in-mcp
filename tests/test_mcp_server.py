@@ -27,7 +27,6 @@ class TestMCPServer(unittest.TestCase):
             # Check that all expected tools are present
             tool_names = [tool.name for tool in tools]
             expected_tools = [
-                "encode-base64",
                 "search-iacr-papers",
                 "download-iacr-paper",
                 "read-iacr-paper",
@@ -35,20 +34,6 @@ class TestMCPServer(unittest.TestCase):
 
             for expected_tool in expected_tools:
                 self.assertIn(expected_tool, tool_names)
-
-        asyncio.run(run_test())
-
-    def test_encode_base64_tool(self):
-        """Test the base64 encoding tool"""
-
-        async def run_test():
-            result = await handle_call_tool("encode-base64", {"text": "Hello World"})
-            result_list = list(result)
-
-            self.assertEqual(len(result_list), 1)
-            self.assertIsInstance(result_list[0], types.TextContent)
-            if isinstance(result_list[0], types.TextContent):
-                self.assertIn("SGVsbG8gV29ybGQ=", result_list[0].text)
 
         asyncio.run(run_test())
 

@@ -1,4 +1,3 @@
-import base64
 import os
 from typing import List, Dict
 from mcp.server.models import InitializationOptions
@@ -22,17 +21,6 @@ async def handle_list_tools() -> list[types.Tool]:
     Each tool specifies its arguments using JSON Schema validation.
     """
     return [
-        types.Tool(
-            name="encode-base64",
-            description="Encode text to Base64",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "text": {"type": "string", "description": "Text to encode"},
-                },
-                "required": ["text"],
-            },
-        ),
         types.Tool(
             name="search-iacr-papers",
             description="Search academic papers from IACR ePrint Archive",
@@ -109,12 +97,7 @@ async def handle_call_tool(
         arguments = {}
 
     try:
-        if name == "encode-base64":
-            text = arguments.get("text", "")
-            encoded = base64.b64encode(text.encode("utf-8")).decode("utf-8")
-            return [types.TextContent(type="text", text=f"Base64 encoded: {encoded}")]
-
-        elif name == "search-iacr-papers":
+        if name == "search-iacr-papers":
             query = arguments.get("query", "")
             max_results = arguments.get("max_results", 10)
             fetch_details = arguments.get("fetch_details", True)
