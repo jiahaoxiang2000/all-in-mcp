@@ -105,17 +105,41 @@ uv run mypy src/all_in_mcp
 
 ### Releases
 
-This project uses automated CI/CD for releases:
+This project uses the existing release helper script for creating releases:
 
-1. Update version in `pyproject.toml`
-2. Create and push a version tag: `git tag v0.1.1 && git push origin v0.1.1`
-3. GitHub Actions will automatically build and publish to PyPI
+#### Using the Release Script
 
-Or use the release helper script:
+Use the release helper script to create a new version:
 
 ```bash
-python scripts/release.py 0.1.1
+python scripts/release.py 0.1.2
 ```
+
+This script will:
+
+1. Update the version in `pyproject.toml`
+2. Create a git commit
+3. Create a git tag
+4. Push the changes to trigger CI/CD
+
+#### Manual Process
+
+Alternatively, you can manually:
+
+1. **Update version** in `pyproject.toml`:
+
+   ```toml
+   version = "0.1.2"  # Change this
+   ```
+
+2. **Commit and tag**:
+
+   ```bash
+   git add pyproject.toml
+   git commit -m "Bump version to 0.1.2"
+   git tag v0.1.2
+   git push --follow-tags
+   ```
 
 ### Debugging
 
