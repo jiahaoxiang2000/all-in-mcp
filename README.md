@@ -7,13 +7,23 @@ An MCP (Model Context Protocol) server that provides daily-use utility functions
 ### Daily Utilities
 
 - **Academic Research**: IACR ePrint Archive paper search, download, and reading
+- **Bibliography Search**: CryptoBib database search for cryptography papers
 
 ### Paper Search Capabilities
+
+#### IACR ePrint Archive
 
 - Search academic papers from IACR ePrint Archive
 - Download PDF files
 - Extract and read text content from papers
 - Metadata extraction (authors, publication dates, abstracts)
+
+#### CryptoBib Database
+
+- Search comprehensive cryptography bibliography database
+- Access to thousands of cryptographic research papers
+- Retrieve structured paper metadata or raw BibTeX entries
+- Support for all major cryptography venues and conferences
 
 ## Quick Start
 
@@ -30,7 +40,7 @@ An MCP (Model Context Protocol) server that provides daily-use utility functions
 pip install all-in-mcp
 ```
 
-### Installation
+### Option 2: Install from Source
 
 1. Clone this repository:
 
@@ -156,6 +166,7 @@ Complete documentation is available in the [`docs/`](docs/) directory:
 - **[API Reference](docs/api.md)** - Complete API documentation
 - **[Installation Guide](docs/installation.md)** - Setup instructions
 - **[IACR Integration](docs/iacr.md)** - Academic paper search details
+- **[CryptoBib Integration](docs/cryptobib.md)** - Bibliography database search
 - **[Development Guide](docs/development.md)** - Contributing guidelines
 - **[PyPI Setup Guide](docs/pypi-setup.md)** - Publishing configuration
 - **[Examples](docs/examples.md)** - Usage examples
