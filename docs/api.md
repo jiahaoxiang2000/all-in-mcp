@@ -108,6 +108,61 @@ URL: https://eprint.iacr.org/2023/1234
 [Full extracted text content]
 ```
 
+## CryptoBib Bibliography Search
+
+### search-cryptobib-papers
+
+Search CryptoBib bibliography database for cryptography papers. CryptoBib is a comprehensive BibTeX database of cryptography-related academic papers.
+
+**Parameters:**
+
+- `query` (string, required): Search query string (e.g., 'cryptography', 'lattice', 'homomorphic')
+- `max_results` (integer, optional): Maximum number of results to return (default: 10)
+- `return_bibtex` (boolean, optional): Whether to return raw BibTeX entries (default: false)
+- `force_download` (boolean, optional): Force download the newest crypto.bib file (default: false)
+
+**Returns:**
+
+- List of papers with metadata or raw BibTeX entries
+
+**Example:**
+
+```json
+{
+  "name": "search-cryptobib-papers",
+  "arguments": {
+    "query": "lattice cryptography",
+    "max_results": 5,
+    "return_bibtex": true,
+    "force_download": false
+  }
+}
+```
+
+**Response:**
+
+````text
+Found 5 BibTeX entries for query 'lattice cryptography':
+
+Entry 1:
+```bibtex
+@InProceedings{CRYPTO:RegLyr05,
+  author = "Oded Regev and Ricky Steinfeld",
+  title = "Learning With Errors over Rings",
+  booktitle = "CRYPTO 2005",
+  year = 2005,
+  ...
+}
+````
+
+**Important Notes:**
+
+- **First Use**: On first use, the tool will download the crypto.bib file (~50MB) and cache it locally in the `./downloads` directory
+- **Caching**: Subsequent searches use the cached file unless `force_download` is set to true
+- **BibTeX Retrieval**: To get specific BibTeX entries, use the `search-cryptobib-papers` tool with `return_bibtex=true` and a specific search query
+- **Content**: The crypto.bib file contains thousands of cryptography-related papers from major conferences and journals
+- **Performance**: Local file searching is much faster than streaming searches
+
 ## Error Handling
 
 All tools return error messages in case of failures:

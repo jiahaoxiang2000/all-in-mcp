@@ -5,13 +5,15 @@ import mcp.types as types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 
-# Import IACR searcher
+# Import searchers
 from .academic_platforms.iacr import IACRSearcher
+from .academic_platforms.cryptobib import CryptoBibSearcher
 
 server = Server("all-in-mcp")
 
-# Initialize IACR searcher
+# Initialize searchers
 iacr_searcher = IACRSearcher()
+cryptobib_searcher = CryptoBibSearcher(cache_dir="./downloads")
 
 
 @server.list_tools()
@@ -81,6 +83,35 @@ async def handle_list_tools() -> list[types.Tool]:
                     },
                 },
                 "required": ["paper_id"],
+            },
+        ),
+        types.Tool(
+            name="search-cryptobib-papers",
+            description="Search CryptoBib bibliography database for cryptography papers",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query string (e.g., 'cryptography', 'lattice', 'homomorphic')",
+                    },
+                    "max_results": {
+                        "type": "integer",
+                        "description": "Maximum number of papers to return (default: 10)",
+                        "default": 10,
+                    },
+                    "return_bibtex": {
+                        "type": "boolean",
+                        "description": "Whether to return raw BibTeX entries (default: False)",
+                        "default": False,
+                    },
+                    "force_download": {
+                        "type": "boolean",
+                        "description": "Force download the newest crypto.bib file (default: False)",
+                        "default": False,
+                    },
+                },
+                "required": ["query"],
             },
         ),
     ]
@@ -185,6 +216,75 @@ async def handle_call_tool(
                     return [types.TextContent(type="text", text=truncated_result)]
                 else:
                     return [types.TextContent(type="text", text=result)]
+
+        elif name == "search-cryptobib-papers":
+            query = arguments.get("query", "")
+            max_results = arguments.get("max_results", 10)
+            return_bibtex = arguments.get("return_bibtex", False)
+            force_download = arguments.get("force_download", False)
+
+            if not query:
+                return [
+                    types.TextContent(
+                        type="text", text="Error: Query parameter is required"
+                    )
+                ]
+
+            if return_bibtex:
+                # Return raw BibTeX entries
+                bibtex_entries = cryptobib_searcher.search_bibtex(
+                    query, max_results, force_download=force_download
+                )
+
+                if not bibtex_entries:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text=f"No BibTeX entries found for query: {query}",
+                        )
+                    ]
+
+                result_text = f"Found {len(bibtex_entries)} BibTeX entries for query '{query}':\n\n"
+                for i, entry in enumerate(bibtex_entries, 1):
+                    result_text += f"Entry {i}:\n```bibtex\n{entry}\n```\n\n"
+
+                return [types.TextContent(type="text", text=result_text)]
+            else:
+                # Return parsed Paper objects
+                papers = cryptobib_searcher.search(
+                    query, max_results, force_download=force_download
+                )
+
+                if not papers:
+                    return [
+                        types.TextContent(
+                            type="text", text=f"No papers found for query: {query}"
+                        )
+                    ]
+
+                result_text = (
+                    f"Found {len(papers)} CryptoBib papers for query '{query}':\n\n"
+                )
+                for i, paper in enumerate(papers, 1):
+                    result_text += f"{i}. **{paper.title}**\n"
+                    result_text += f"   - Entry Key: {paper.paper_id}\n"
+                    result_text += f"   - Authors: {', '.join(paper.authors)}\n"
+                    if paper.extra and "venue" in paper.extra:
+                        result_text += f"   - Venue: {paper.extra['venue']}\n"
+                    if paper.published_date and paper.published_date.year > 1900:
+                        result_text += f"   - Year: {paper.published_date.year}\n"
+                    if paper.doi:
+                        result_text += f"   - DOI: {paper.doi}\n"
+                    if paper.extra and "pages" in paper.extra:
+                        result_text += f"   - Pages: {paper.extra['pages']}\n"
+                    # Only include BibTeX when explicitly requested
+                    if return_bibtex and paper.extra and "bibtex" in paper.extra:
+                        result_text += (
+                            f"   - BibTeX:\n```bibtex\n{paper.extra['bibtex']}\n```\n"
+                        )
+                    result_text += "\n"
+
+                return [types.TextContent(type="text", text=result_text)]
 
         else:
             raise ValueError(f"Unknown tool: {name}")
