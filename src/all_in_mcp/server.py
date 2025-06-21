@@ -110,6 +110,14 @@ async def handle_list_tools() -> list[types.Tool]:
                         "description": "Force download the newest crypto.bib file (default: False)",
                         "default": False,
                     },
+                    "year_min": {
+                        "type": "integer",
+                        "description": "Minimum publication year (inclusive, optional)",
+                    },
+                    "year_max": {
+                        "type": "integer",
+                        "description": "Maximum publication year (inclusive, optional)",
+                    },
                 },
                 "required": ["query"],
             },
@@ -222,6 +230,8 @@ async def handle_call_tool(
             max_results = arguments.get("max_results", 10)
             return_bibtex = arguments.get("return_bibtex", False)
             force_download = arguments.get("force_download", False)
+            year_min = arguments.get("year_min")
+            year_max = arguments.get("year_max")
 
             if not query:
                 return [
@@ -233,18 +243,32 @@ async def handle_call_tool(
             if return_bibtex:
                 # Return raw BibTeX entries
                 bibtex_entries = cryptobib_searcher.search_bibtex(
-                    query, max_results, force_download=force_download
+                    query,
+                    max_results,
+                    force_download=force_download,
+                    year_min=year_min,
+                    year_max=year_max,
                 )
 
                 if not bibtex_entries:
+                    year_filter_msg = ""
+                    if year_min or year_max:
+                        year_range = (
+                            f" ({year_min or 'earliest'}-{year_max or 'latest'})"
+                        )
+                        year_filter_msg = f" in year range{year_range}"
                     return [
                         types.TextContent(
                             type="text",
-                            text=f"No BibTeX entries found for query: {query}",
+                            text=f"No BibTeX entries found for query: {query}{year_filter_msg}",
                         )
                     ]
 
-                result_text = f"Found {len(bibtex_entries)} BibTeX entries for query '{query}':\n\n"
+                year_filter_msg = ""
+                if year_min or year_max:
+                    year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
+                    year_filter_msg = f" in year range{year_range}"
+                result_text = f"Found {len(bibtex_entries)} BibTeX entries for query '{query}'{year_filter_msg}:\n\n"
                 for i, entry in enumerate(bibtex_entries, 1):
                     result_text += f"Entry {i}:\n```bibtex\n{entry}\n```\n\n"
 
@@ -252,19 +276,32 @@ async def handle_call_tool(
             else:
                 # Return parsed Paper objects
                 papers = cryptobib_searcher.search(
-                    query, max_results, force_download=force_download
+                    query,
+                    max_results,
+                    force_download=force_download,
+                    year_min=year_min,
+                    year_max=year_max,
                 )
 
                 if not papers:
+                    year_filter_msg = ""
+                    if year_min or year_max:
+                        year_range = (
+                            f" ({year_min or 'earliest'}-{year_max or 'latest'})"
+                        )
+                        year_filter_msg = f" in year range{year_range}"
                     return [
                         types.TextContent(
-                            type="text", text=f"No papers found for query: {query}"
+                            type="text",
+                            text=f"No papers found for query: {query}{year_filter_msg}",
                         )
                     ]
 
-                result_text = (
-                    f"Found {len(papers)} CryptoBib papers for query '{query}':\n\n"
-                )
+                year_filter_msg = ""
+                if year_min or year_max:
+                    year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
+                    year_filter_msg = f" in year range{year_range}"
+                result_text = f"Found {len(papers)} CryptoBib papers for query '{query}'{year_filter_msg}:\n\n"
                 for i, paper in enumerate(papers, 1):
                     result_text += f"{i}. **{paper.title}**\n"
                     result_text += f"   - Entry Key: {paper.paper_id}\n"

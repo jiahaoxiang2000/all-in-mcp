@@ -216,7 +216,12 @@ class CryptoBibSearcher(PaperSource):
             return None
 
     def search_bibtex(
-        self, query: str, max_results: int = 10, force_download: bool = False
+        self,
+        query: str,
+        max_results: int = 10,
+        force_download: bool = False,
+        year_min: int | None = None,
+        year_max: int | None = None,
     ) -> list[str]:
         """
         Search CryptoBib and return raw BibTeX entries
@@ -225,9 +230,21 @@ class CryptoBibSearcher(PaperSource):
             query: Search query string
             max_results: Maximum number of results to return
             force_download: Force download the newest crypto.bib file
+            year_min: Minimum publication year (inclusive, optional)
+            year_max: Maximum publication year (inclusive, optional)
 
         Returns:
             List[str]: List of BibTeX entries as strings
+
+        Example:
+            >>> searcher = CryptoBibSearcher()
+            >>> # Search for recent implementation papers (2020-2024)
+            >>> entries = searcher.search_bibtex("implement", max_results=5,
+            ...                                 year_min=2020, year_max=2024)
+            >>>
+            >>> # Search for older RSA papers (1980-2000)
+            >>> entries = searcher.search_bibtex("RSA", max_results=10,
+            ...                                 year_min=1980, year_max=2000)
         """
         bibtex_entries = []
 
@@ -261,13 +278,17 @@ class CryptoBibSearcher(PaperSource):
                         if brace_count <= 0:
                             # Entry is complete, check if it matches the query
                             if query_lower in current_entry.lower():
-                                bibtex_entries.append(current_entry.strip())
-                                logger.info(
-                                    f"Found matching entry {len(bibtex_entries)} at line {line_num}"
-                                )
+                                # Check year range if specified
+                                if self._entry_matches_year_range(
+                                    current_entry, year_min, year_max
+                                ):
+                                    bibtex_entries.append(current_entry.strip())
+                                    logger.info(
+                                        f"Found matching entry {len(bibtex_entries)} at line {line_num}"
+                                    )
 
-                                if len(bibtex_entries) >= max_results:
-                                    break
+                                    if len(bibtex_entries) >= max_results:
+                                        break
 
                             # Reset for next entry
                             current_entry = ""
@@ -287,6 +308,8 @@ class CryptoBibSearcher(PaperSource):
         max_results: int = 10,
         return_bibtex: bool = False,
         force_download: bool = False,
+        year_min: int | None = None,
+        year_max: int | None = None,
     ) -> list[Paper]:
         """
         Search CryptoBib bibliography
@@ -296,16 +319,32 @@ class CryptoBibSearcher(PaperSource):
             max_results: Maximum number of results to return
             return_bibtex: If True, include raw BibTeX in results
             force_download: Force download the newest crypto.bib file
+            year_min: Minimum publication year (inclusive, optional)
+            year_max: Maximum publication year (inclusive, optional)
 
         Returns:
             List[Paper]: List of paper objects
+
+        Example:
+            >>> searcher = CryptoBibSearcher()
+            >>> # Search for recent zero-knowledge papers (2020-2024)
+            >>> papers = searcher.search("zero knowledge", max_results=5,
+            ...                         year_min=2020, year_max=2024)
+            >>>
+            >>> # Search for classic RSA papers (1977-1990)
+            >>> papers = searcher.search("RSA", max_results=10,
+            ...                         year_min=1977, year_max=1990)
         """
         papers = []
 
         try:
             # Get BibTeX entries
             bibtex_entries = self.search_bibtex(
-                query, max_results, force_download=force_download
+                query,
+                max_results,
+                force_download=force_download,
+                year_min=year_min,
+                year_max=year_max,
             )
 
             # Parse each entry into Paper objects
@@ -377,3 +416,46 @@ class CryptoBibSearcher(PaperSource):
             logger.error(f"Error searching for entry {entry_key}: {e}")
 
         return None
+
+    def _entry_matches_year_range(
+        self, bibtex_entry: str, year_min: int | None, year_max: int | None
+    ) -> bool:
+        """
+        Check if a BibTeX entry falls within the specified year range
+
+        Args:
+            bibtex_entry: Raw BibTeX entry text
+            year_min: Minimum year (inclusive, None means no minimum)
+            year_max: Maximum year (inclusive, None means no maximum)
+
+        Returns:
+            bool: True if entry is within year range, False otherwise
+        """
+        # If no year constraints specified, all entries match
+        if year_min is None and year_max is None:
+            return True
+
+        try:
+            # Extract year from the BibTeX entry
+            year_match = re.search(
+                r'year\s*=\s*(?:["{\s]*)?(\d{4})', bibtex_entry, re.IGNORECASE
+            )
+            if not year_match:
+                # If no year found, exclude from results when year filtering is requested
+                return False
+
+            entry_year = int(year_match.group(1))
+
+            # Check minimum year constraint
+            if year_min is not None and entry_year < year_min:
+                return False
+
+            # Check maximum year constraint
+            if year_max is not None and entry_year > year_max:
+                return False
+
+            return True
+
+        except (ValueError, AttributeError):
+            # If year parsing fails, exclude from results when year filtering is requested
+            return False
