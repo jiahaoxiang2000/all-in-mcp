@@ -55,6 +55,7 @@ To publish a new version:
    ```
 
 The GitHub Action will automatically:
+
 - Run tests on multiple Python versions
 - Build the package
 - Publish to PyPI
