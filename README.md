@@ -8,6 +8,7 @@ An MCP (Model Context Protocol) server that provides daily-use utility functions
 
 - **Academic Research**: IACR ePrint Archive paper search, download, and reading
 - **Bibliography Search**: CryptoBib database search for cryptography papers
+- **Google Scholar**: Search academic papers across disciplines with citation data
 - **PDF Reading**: Read and extract text from local and online PDF files
 
 ### Paper Search Capabilities
@@ -25,6 +26,13 @@ An MCP (Model Context Protocol) server that provides daily-use utility functions
 - Access to thousands of cryptographic research papers
 - Retrieve structured paper metadata or raw BibTeX entries
 - Support for all major cryptography venues and conferences
+
+#### Google Scholar
+
+- Search academic papers across multiple disciplines
+- Access to citation counts and publication metadata
+- Broad coverage of academic literature from various sources
+- Year-based filtering for targeted searches
 
 ## Quick Start
 

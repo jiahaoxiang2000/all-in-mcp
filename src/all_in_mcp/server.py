@@ -4,6 +4,7 @@ from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 
 from .academic_platforms.cryptobib import CryptoBibSearcher
+from .academic_platforms.google_scholar import GoogleScholarSearcher
 
 # Import searchers
 from .academic_platforms.iacr import IACRSearcher
@@ -14,6 +15,7 @@ server = Server("all-in-mcp")
 # Initialize searchers
 iacr_searcher = IACRSearcher()
 cryptobib_searcher = CryptoBibSearcher(cache_dir="./downloads")
+google_scholar_searcher = GoogleScholarSearcher()
 
 
 @server.list_tools()
@@ -117,6 +119,33 @@ async def handle_list_tools() -> list[types.Tool]:
                     "year_max": {
                         "type": "integer",
                         "description": "Maximum publication year (inclusive, optional)",
+                    },
+                },
+                "required": ["query"],
+            },
+        ),
+        types.Tool(
+            name="search-google-scholar-papers",
+            description="Search academic papers from Google Scholar",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query string (e.g., 'machine learning', 'neural networks')",
+                    },
+                    "max_results": {
+                        "type": "integer",
+                        "description": "Maximum number of papers to return (default: 10)",
+                        "default": 10,
+                    },
+                    "year_low": {
+                        "type": "integer",
+                        "description": "Minimum publication year (optional)",
+                    },
+                    "year_high": {
+                        "type": "integer",
+                        "description": "Maximum publication year (optional)",
                     },
                 },
                 "required": ["query"],
@@ -336,6 +365,75 @@ async def handle_call_tool(
                     result_text += "\n"
 
                 return [types.TextContent(type="text", text=result_text)]
+
+        elif name == "search-google-scholar-papers":
+            query = arguments.get("query", "")
+            max_results = arguments.get("max_results", 10)
+            year_low = arguments.get("year_low")
+            year_high = arguments.get("year_high")
+
+            if not query:
+                return [
+                    types.TextContent(
+                        type="text", text="Error: Query parameter is required"
+                    )
+                ]
+
+            try:
+                papers = google_scholar_searcher.search(
+                    query,
+                    max_results=max_results,
+                    year_low=year_low,
+                    year_high=year_high,
+                )
+
+                if not papers:
+                    year_filter_msg = ""
+                    if year_low or year_high:
+                        year_range = (
+                            f" ({year_low or 'earliest'}-{year_high or 'latest'})"
+                        )
+                        year_filter_msg = f" in year range{year_range}"
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text=f"No papers found for query: {query}{year_filter_msg}",
+                        )
+                    ]
+
+                year_filter_msg = ""
+                if year_low or year_high:
+                    year_range = f" ({year_low or 'earliest'}-{year_high or 'latest'})"
+                    year_filter_msg = f" in year range{year_range}"
+
+                result_text = f"Found {len(papers)} Google Scholar papers for query '{query}'{year_filter_msg}:\n\n"
+                for i, paper in enumerate(papers, 1):
+                    result_text += f"{i}. **{paper.title}**\n"
+                    result_text += f"   - Authors: {', '.join(paper.authors)}\n"
+                    if paper.citations > 0:
+                        result_text += f"   - Citations: {paper.citations}\n"
+                    if paper.published_date and paper.published_date.year > 1900:
+                        result_text += f"   - Year: {paper.published_date.year}\n"
+                    if paper.url:
+                        result_text += f"   - URL: {paper.url}\n"
+                    if paper.abstract:
+                        # Truncate abstract for readability
+                        abstract_preview = (
+                            paper.abstract[:300] + "..."
+                            if len(paper.abstract) > 300
+                            else paper.abstract
+                        )
+                        result_text += f"   - Abstract: {abstract_preview}\n"
+                    result_text += "\n"
+
+                return [types.TextContent(type="text", text=result_text)]
+
+            except Exception as e:
+                return [
+                    types.TextContent(
+                        type="text", text=f"Error searching Google Scholar: {e!s}"
+                    )
+                ]
 
         elif name == "read-pdf":
             pdf_source = arguments.get("pdf_source", "")

@@ -108,6 +108,56 @@ URL: https://eprint.iacr.org/2023/1234
 [Full extracted text content]
 ```
 
+## Google Scholar Search
+
+### search-google-scholar-papers
+
+Search academic papers from Google Scholar. This provides broad coverage across multiple academic disciplines and includes citation information.
+
+**Parameters:**
+
+- `query` (string, required): Search query string (e.g., 'machine learning', 'neural networks')
+- `max_results` (integer, optional): Maximum number of results to return (default: 10)
+- `year_low` (integer, optional): Minimum publication year for filtering
+- `year_high` (integer, optional): Maximum publication year for filtering
+
+**Returns:**
+
+- List of papers with metadata (title, authors, citations, year, URL, abstract)
+
+**Example:**
+
+```json
+{
+  "name": "search-google-scholar-papers",
+  "arguments": {
+    "query": "deep learning transformers",
+    "max_results": 5,
+    "year_low": 2020,
+    "year_high": 2024
+  }
+}
+```
+
+**Response:**
+
+```
+Found 3 Google Scholar papers for query 'deep learning transformers' in year range (2020-2024):
+
+1. **Attention Is All You Need**
+   - Authors: Ashish Vaswani, Noam Shazeer, Niki Parmar
+   - Citations: 85234
+   - Year: 2017
+   - URL: https://papers.nips.cc/paper/7181-attention-is-all-you-need
+   - Abstract: The dominant sequence transduction models are based on complex recurrent or convolutional neural networks...
+```
+
+**Limitations:**
+
+- No direct PDF downloads (redirects to publisher websites)
+- Rate limiting may apply for frequent requests
+- Results may vary based on geographic location
+
 ## CryptoBib Bibliography Search
 
 ### search-cryptobib-papers
