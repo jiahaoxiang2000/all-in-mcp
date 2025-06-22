@@ -1,6 +1,6 @@
 [project]
 name = "all-in-mcp"
-version = "0.2.3"
+version = "0.2.4"
 description = "An MCP (Model Context Protocol) server providing daily-use utility functions and academic paper search capabilities"
 readme = "README.md"
 license = { text = "MIT" }
