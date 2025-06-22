@@ -30,6 +30,10 @@ class TestMCPServer(unittest.TestCase):
                 "search-iacr-papers",
                 "download-iacr-paper",
                 "read-iacr-paper",
+                "search-crossref-papers",
+                "search-google-scholar-papers",
+                "search-cryptobib-papers",
+                "read-pdf",
             ]
 
             for expected_tool in expected_tools:

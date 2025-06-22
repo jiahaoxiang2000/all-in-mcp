@@ -4,6 +4,7 @@ from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 
 from .academic_platforms.cryptobib import CryptoBibSearcher
+from .academic_platforms.crossref import CrossrefSearcher
 from .academic_platforms.google_scholar import GoogleScholarSearcher
 
 # Import searchers
@@ -15,6 +16,7 @@ server = Server("all-in-mcp")
 # Initialize searchers
 iacr_searcher = IACRSearcher()
 cryptobib_searcher = CryptoBibSearcher(cache_dir="./downloads")
+crossref_searcher = CrossrefSearcher()
 google_scholar_searcher = GoogleScholarSearcher()
 
 
@@ -149,6 +151,76 @@ async def handle_list_tools() -> list[types.Tool]:
                     },
                 },
                 "required": ["query"],
+            },
+        ),
+        types.Tool(
+            name="search-crossref-papers",
+            description="Search academic papers from Crossref database",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query string (e.g., 'quantum computing', 'machine learning')",
+                    },
+                    "max_results": {
+                        "type": "integer",
+                        "description": "Maximum number of papers to return (default: 10)",
+                        "default": 10,
+                    },
+                    "year_min": {
+                        "type": "integer",
+                        "description": "Minimum publication year (optional)",
+                    },
+                    "year_max": {
+                        "type": "integer",
+                        "description": "Maximum publication year (optional)",
+                    },
+                    "sort_by": {
+                        "type": "string",
+                        "description": "Sort order: relevance, published, indexed, updated (default: relevance)",
+                        "default": "relevance",
+                    },
+                },
+                "required": ["query"],
+            },
+        ),
+        types.Tool(
+            name="download-crossref-paper",
+            description="Download PDF of a Crossref paper (when available from publisher)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "paper_id": {
+                        "type": "string",
+                        "description": "DOI or URL of the paper",
+                    },
+                    "save_path": {
+                        "type": "string",
+                        "description": "Directory to save the PDF (default: './downloads')",
+                        "default": "./downloads",
+                    },
+                },
+                "required": ["paper_id"],
+            },
+        ),
+        types.Tool(
+            name="read-crossref-paper",
+            description="Read and extract text content from a Crossref paper PDF",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "paper_id": {
+                        "type": "string",
+                        "description": "DOI or URL of the paper",
+                    },
+                    "save_path": {
+                        "type": "string",
+                        "description": "Directory where the PDF is/will be saved (default: './downloads')",
+                        "default": "./downloads",
+                    },
+                },
+                "required": ["paper_id"],
             },
         ),
         types.Tool(
@@ -434,6 +506,133 @@ async def handle_call_tool(
                         type="text", text=f"Error searching Google Scholar: {e!s}"
                     )
                 ]
+
+        elif name == "search-crossref-papers":
+            query = arguments.get("query", "")
+            max_results = arguments.get("max_results", 10)
+            year_min = arguments.get("year_min")
+            year_max = arguments.get("year_max")
+            sort_by = arguments.get("sort_by", "relevance")
+
+            if not query:
+                return [
+                    types.TextContent(
+                        type="text", text="Error: Query parameter is required"
+                    )
+                ]
+
+            try:
+                papers = crossref_searcher.search(
+                    query,
+                    max_results=max_results,
+                    year_min=year_min,
+                    year_max=year_max,
+                    sort_by=sort_by,
+                )
+
+                if not papers:
+                    year_filter_msg = ""
+                    if year_min or year_max:
+                        year_range = (
+                            f" ({year_min or 'earliest'}-{year_max or 'latest'})"
+                        )
+                        year_filter_msg = f" in year range{year_range}"
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text=f"No papers found for query: {query}{year_filter_msg}",
+                        )
+                    ]
+
+                year_filter_msg = ""
+                if year_min or year_max:
+                    year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
+                    year_filter_msg = f" in year range{year_range}"
+
+                result_text = f"Found {len(papers)} Crossref papers for query '{query}'{year_filter_msg}:\n\n"
+                for i, paper in enumerate(papers, 1):
+                    result_text += f"{i}. **{paper.title}**\n"
+                    result_text += f"   - Authors: {', '.join(paper.authors)}\n"
+                    if paper.doi:
+                        result_text += f"   - DOI: {paper.doi}\n"
+                    if paper.citations > 0:
+                        result_text += f"   - Citations: {paper.citations}\n"
+                    if paper.published_date and paper.published_date.year > 1900:
+                        result_text += f"   - Year: {paper.published_date.year}\n"
+                    if paper.extra and paper.extra.get("journal"):
+                        result_text += f"   - Journal: {paper.extra['journal']}\n"
+                    if paper.extra and paper.extra.get("volume"):
+                        result_text += f"   - Volume: {paper.extra['volume']}\n"
+                    if paper.extra and paper.extra.get("pages"):
+                        result_text += f"   - Pages: {paper.extra['pages']}\n"
+                    if paper.url:
+                        result_text += f"   - URL: {paper.url}\n"
+                    if paper.abstract:
+                        # Truncate abstract for readability
+                        abstract_preview = (
+                            paper.abstract[:300] + "..."
+                            if len(paper.abstract) > 300
+                            else paper.abstract
+                        )
+                        result_text += f"   - Abstract: {abstract_preview}\n"
+                    result_text += "\n"
+
+                return [types.TextContent(type="text", text=result_text)]
+
+            except Exception as e:
+                return [
+                    types.TextContent(
+                        type="text", text=f"Error searching Crossref: {e!s}"
+                    )
+                ]
+
+        elif name == "download-crossref-paper":
+            paper_id = arguments.get("paper_id", "")
+            save_path = arguments.get("save_path", "./downloads")
+
+            if not paper_id:
+                return [
+                    types.TextContent(
+                        type="text", text="Error: paper_id parameter is required"
+                    )
+                ]
+
+            result = crossref_searcher.download_pdf(paper_id, save_path)
+
+            if result.startswith("Error"):
+                return [types.TextContent(type="text", text=result)]
+            else:
+                return [
+                    types.TextContent(
+                        type="text", text=f"PDF downloaded successfully to: {result}"
+                    )
+                ]
+
+        elif name == "read-crossref-paper":
+            paper_id = arguments.get("paper_id", "")
+            save_path = arguments.get("save_path", "./downloads")
+
+            if not paper_id:
+                return [
+                    types.TextContent(
+                        type="text", text="Error: paper_id parameter is required"
+                    )
+                ]
+
+            result = crossref_searcher.read_paper(paper_id, save_path)
+
+            if result.startswith("Error"):
+                return [types.TextContent(type="text", text=result)]
+            else:
+                # Truncate very long text for display
+                if len(result) > 5000:
+                    truncated_result = (
+                        result[:5000]
+                        + f"\n\n... [Text truncated. Full text is {len(result)} characters long]"
+                    )
+                    return [types.TextContent(type="text", text=truncated_result)]
+                else:
+                    return [types.TextContent(type="text", text=result)]
 
         elif name == "read-pdf":
             pdf_source = arguments.get("pdf_source", "")
