@@ -3,4 +3,4 @@ from .base import PaperSource
 from .cryptobib import CryptoBibSearcher
 from .iacr import IACRSearcher
 
-__all__ = ["PaperSource", "CryptoBibSearcher", "IACRSearcher"]
+__all__ = ["CryptoBibSearcher", "IACRSearcher", "PaperSource"]

@@ -8,6 +8,7 @@ An MCP (Model Context Protocol) server that provides daily-use utility functions
 
 - **Academic Research**: IACR ePrint Archive paper search, download, and reading
 - **Bibliography Search**: CryptoBib database search for cryptography papers
+- **PDF Reading**: Read and extract text from local and online PDF files
 
 ### Paper Search Capabilities
 

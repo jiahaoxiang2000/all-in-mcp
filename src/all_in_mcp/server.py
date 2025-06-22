@@ -1,13 +1,13 @@
-import os
-from typing import List, Dict
 import mcp.server.stdio
 import mcp.types as types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 
+from .academic_platforms.cryptobib import CryptoBibSearcher
+
 # Import searchers
 from .academic_platforms.iacr import IACRSearcher
-from .academic_platforms.cryptobib import CryptoBibSearcher
+from .paper import read_pdf
 
 server = Server("all-in-mcp")
 
@@ -120,6 +120,20 @@ async def handle_list_tools() -> list[types.Tool]:
                     },
                 },
                 "required": ["query"],
+            },
+        ),
+        types.Tool(
+            name="read-pdf",
+            description="Read and extract text content from a PDF file (local or online)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "pdf_source": {
+                        "type": "string",
+                        "description": "Path to local PDF file or URL to online PDF",
+                    },
+                },
+                "required": ["pdf_source"],
             },
         ),
     ]
@@ -322,6 +336,27 @@ async def handle_call_tool(
                     result_text += "\n"
 
                 return [types.TextContent(type="text", text=result_text)]
+
+        elif name == "read-pdf":
+            pdf_source = arguments.get("pdf_source", "")
+
+            if not pdf_source:
+                return [
+                    types.TextContent(
+                        type="text", text="Error: pdf_source parameter is required"
+                    )
+                ]
+
+            try:
+                result = read_pdf(pdf_source)
+                return [types.TextContent(type="text", text=result)]
+
+            except Exception as e:
+                return [
+                    types.TextContent(
+                        type="text", text=f"Error reading PDF from {pdf_source}: {e!s}"
+                    )
+                ]
 
         else:
             raise ValueError(f"Unknown tool: {name}")

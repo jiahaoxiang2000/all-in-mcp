@@ -1,6 +1,5 @@
 # all_in_mcp/academic_platforms/cryptobib.py
 import logging
-import os
 import random
 import re
 from datetime import datetime
@@ -118,7 +117,7 @@ class CryptoBibSearcher(PaperSource):
 
             # Extract fields using a more robust approach
             # First, normalize the text by removing extra whitespace
-            normalized_text = re.sub(r"\s+", " ", bibtex_text)
+            re.sub(r"\s+", " ", bibtex_text)
 
             # Extract fields with better pattern matching
             field_dict = {}
@@ -263,7 +262,7 @@ class CryptoBibSearcher(PaperSource):
             # Convert query to lowercase for case-insensitive search
             query_lower = query.lower()
 
-            with open(self.bib_file_path, "r", encoding="utf-8") as f:
+            with open(self.bib_file_path, encoding="utf-8") as f:
                 for line_num, line in enumerate(f, 1):
                     # Check if this is the start of a new entry
                     if line.strip().startswith("@") and not in_entry:
@@ -395,10 +394,10 @@ class CryptoBibSearcher(PaperSource):
             in_entry = False
             brace_count = 0
 
-            with open(self.bib_file_path, "r", encoding="utf-8") as f:
+            with open(self.bib_file_path, encoding="utf-8") as f:
                 for line in f:
                     # Check if this is the start of the entry we're looking for
-                    if line.strip().startswith(f"@") and entry_key in line:
+                    if line.strip().startswith("@") and entry_key in line:
                         current_entry = line
                         in_entry = True
                         brace_count = line.count("{") - line.count("}")
