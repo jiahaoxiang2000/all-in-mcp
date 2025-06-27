@@ -1,6 +1,9 @@
 # All-in-MCP
 
-An MCP (Model Context Protocol) server that provides daily-use utility functions, including academic paper search capabilities.
+An MCP (Model Context Protocol) server that provides utility functions, including academic paper search capabilities.
+
+- [**Paper Tools overview _Video_**](https://www.bilibili.com/video/BV1RMKWzdEk8)
+- [_Overview PDF_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/setup.pdf)
 
 ## Features
 
@@ -25,39 +28,42 @@ All tools are implemented as async MCP endpoints with proper validation and erro
 
 ## Quick Start
 
+- [**Video for Env Setup**](https://www.bilibili.com/video/BV1cZKozaEjg)
+- [_Overview PDF_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/config.pdf)
+
 ### Prerequisites
 
 - Python 3.12 or higher
 - UV package manager
 
-## Installation
+### Installation
 
-### Install from PyPI (Recommended by `UV`)
+Install from PyPI (Recommended by `UV`)
 
 ```bash
 uv pip install all-in-mcp
 ```
 
-## Integration with MCP Clients
+### Integration with MCP Clients Vscode
 
 Add this server to your MCP client configuration. The server runs using stdio transport.
-See detailed integration guide in [`docs/INTEGRATION.md`](docs/INTEGRATION.md).
 
-Example configuration for Claude Desktop:
+Example configuration for Vscode:
 
-```json
+```json .vscode/mcp.json
 {
-  "mcpServers": {
+  "servers": {
     "all-in-mcp": {
+      "type": "stdio",
       "command": "uv",
-      "args": ["run", "all-in-mcp"],
-      "cwd": "/path/to/all-in-mcp"
+      "args": ["run", "all-in-mcp"]
     }
   }
 }
 ```
 
-## Development
+<details>
+<summary>Development</summary>
 
 For development setup and contribution guidelines, see the [Development Guide](docs/development.md).
 
@@ -74,3 +80,5 @@ uv sync --extra dev
 # Run tests
 uv run pytest
 ```
+
+</details>
