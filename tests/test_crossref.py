@@ -162,16 +162,6 @@ class TestCrossrefSearcher:
         call_args = mock_get.call_args
         assert "works/10.1000%2Ftest.doi.1" in call_args[0][0]
 
-    def test_download_pdf_missing_id(self):
-        """Test PDF download with missing paper ID"""
-        result = self.searcher.download_pdf("", "./downloads")
-        assert result.startswith("Error:")
-
-    def test_read_paper_missing_id(self):
-        """Test paper reading with missing paper ID"""
-        result = self.searcher.read_paper("", "./downloads")
-        assert result.startswith("Error:")
-
     @patch("httpx.Client.get")
     def test_sort_options(self, mock_get):
         """Test different sort options"""
@@ -197,29 +187,6 @@ class TestCrossrefSearcher:
 
         papers = self.searcher.search("test query", max_results=5)
         assert papers == []
-
-    @patch("httpx.Client.get")
-    def test_download_pdf_with_doi(self, mock_get):
-        """Test PDF download with DOI"""
-        # Mock the work details response
-        work_response = Mock()
-        work_response.json.return_value = self.mock_single_work_response
-        work_response.raise_for_status.return_value = None
-
-        # Mock the PDF download response
-        pdf_response = Mock()
-        pdf_response.content = b"fake pdf content"
-        pdf_response.raise_for_status.return_value = None
-
-        mock_get.side_effect = [work_response, pdf_response]
-
-        with patch("builtins.open", create=True) as mock_open:
-            with patch("pathlib.Path.mkdir"):
-                result = self.searcher.download_pdf("10.1000/test.doi.1", "./downloads")
-
-                assert not result.startswith("Error:")
-                assert "crossref_10_1000_test_doi_1.pdf" in result
-                mock_open.assert_called_once()
 
     @patch("httpx.Client.get")
     def test_parse_work_with_minimal_data(self, mock_get):

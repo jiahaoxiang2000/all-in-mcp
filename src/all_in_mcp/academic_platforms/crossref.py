@@ -224,87 +224,15 @@ class CrossrefSearcher(PaperSource):
 
     def download_pdf(self, paper_id: str, save_path: str) -> str:
         """
-        Download PDF for a paper (limited functionality for Crossref)
-
-        Note: Crossref is primarily a metadata service. PDF downloads
-        depend on publisher policies and may not always be available.
+        Not implemented: Download PDF for a paper (limited functionality for Crossref)
         """
-        if not paper_id:
-            return "Error: paper_id is required"
-
-        try:
-            # If paper_id is a DOI, try to get work details first
-            if not paper_id.startswith("http"):
-                work_url = f"{self.WORKS_ENDPOINT}/{quote_plus(paper_id)}"
-                response = self.client.get(work_url, headers=self._get_headers())
-                response.raise_for_status()
-
-                work_data = response.json()
-                work = work_data.get("message", {})
-
-                # Look for PDF link
-                links = work.get("link", [])
-                pdf_url = None
-                for link in links:
-                    if link.get("content-type") == "application/pdf":
-                        pdf_url = link.get("URL")
-                        break
-
-                if not pdf_url:
-                    return f"Error: No PDF link found for DOI {paper_id}. Crossref provides metadata; PDFs are hosted by publishers."
-            else:
-                pdf_url = paper_id
-
-            # Attempt to download PDF
-            from pathlib import Path
-
-            save_path_obj = Path(save_path)
-            save_path_obj.mkdir(parents=True, exist_ok=True)
-
-            # Create filename from DOI or URL
-            if paper_id.startswith("10."):
-                filename = (
-                    f"crossref_{paper_id.replace('/', '_').replace('.', '_')}.pdf"
-                )
-            else:
-                filename = f"crossref_paper_{hash(paper_id) % 10000}.pdf"
-
-            file_path = save_path_obj / filename
-
-            pdf_response = self.client.get(pdf_url, headers=self._get_headers())
-            pdf_response.raise_for_status()
-
-            with open(file_path, "wb") as f:
-                f.write(pdf_response.content)
-
-            return str(file_path)
-
-        except Exception as e:
-            return f"Error downloading PDF: {e}"
+        return "Crossref does not provide a direct way to download PDFs. Use the paper's URL or DOI to access the publisher's site for PDF downloads if available."
 
     def read_paper(self, paper_id: str, save_path: str) -> str:
         """
-        Read paper text (downloads PDF first if needed)
-
-        Note: Success depends on PDF availability from publishers
+        crossref doesn't provide a direct way to read paper text.
         """
-        if not paper_id:
-            return "Error: paper_id is required"
-
-        try:
-            # First try to download the PDF
-            pdf_path = self.download_pdf(paper_id, save_path)
-
-            if pdf_path.startswith("Error"):
-                return pdf_path
-
-            # Read the PDF using the existing read_pdf function
-            from ..paper import read_pdf
-
-            return read_pdf(pdf_path)
-
-        except Exception as e:
-            return f"Error reading paper: {e}"
+        return "Crossref does not provide a direct way to read paper text. Use the download_pdf method to get the PDF if available."
 
     def search_by_doi(self, doi: str) -> Optional[Paper]:
         """Search for a specific paper by DOI"""

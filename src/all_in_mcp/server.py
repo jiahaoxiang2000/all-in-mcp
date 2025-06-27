@@ -186,44 +186,6 @@ async def handle_list_tools() -> list[types.Tool]:
             },
         ),
         types.Tool(
-            name="download-crossref-paper",
-            description="Download PDF of a Crossref paper (when available from publisher)",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "paper_id": {
-                        "type": "string",
-                        "description": "DOI or URL of the paper",
-                    },
-                    "save_path": {
-                        "type": "string",
-                        "description": "Directory to save the PDF (default: './downloads')",
-                        "default": "./downloads",
-                    },
-                },
-                "required": ["paper_id"],
-            },
-        ),
-        types.Tool(
-            name="read-crossref-paper",
-            description="Read and extract text content from a Crossref paper PDF",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "paper_id": {
-                        "type": "string",
-                        "description": "DOI or URL of the paper",
-                    },
-                    "save_path": {
-                        "type": "string",
-                        "description": "Directory where the PDF is/will be saved (default: './downloads')",
-                        "default": "./downloads",
-                    },
-                },
-                "required": ["paper_id"],
-            },
-        ),
-        types.Tool(
             name="read-pdf",
             description="Read and extract text content from a PDF file (local or online)",
             inputSchema={
@@ -585,54 +547,6 @@ async def handle_call_tool(
                         type="text", text=f"Error searching Crossref: {e!s}"
                     )
                 ]
-
-        elif name == "download-crossref-paper":
-            paper_id = arguments.get("paper_id", "")
-            save_path = arguments.get("save_path", "./downloads")
-
-            if not paper_id:
-                return [
-                    types.TextContent(
-                        type="text", text="Error: paper_id parameter is required"
-                    )
-                ]
-
-            result = crossref_searcher.download_pdf(paper_id, save_path)
-
-            if result.startswith("Error"):
-                return [types.TextContent(type="text", text=result)]
-            else:
-                return [
-                    types.TextContent(
-                        type="text", text=f"PDF downloaded successfully to: {result}"
-                    )
-                ]
-
-        elif name == "read-crossref-paper":
-            paper_id = arguments.get("paper_id", "")
-            save_path = arguments.get("save_path", "./downloads")
-
-            if not paper_id:
-                return [
-                    types.TextContent(
-                        type="text", text="Error: paper_id parameter is required"
-                    )
-                ]
-
-            result = crossref_searcher.read_paper(paper_id, save_path)
-
-            if result.startswith("Error"):
-                return [types.TextContent(type="text", text=result)]
-            else:
-                # Truncate very long text for display
-                if len(result) > 5000:
-                    truncated_result = (
-                        result[:5000]
-                        + f"\n\n... [Text truncated. Full text is {len(result)} characters long]"
-                    )
-                    return [types.TextContent(type="text", text=truncated_result)]
-                else:
-                    return [types.TextContent(type="text", text=result)]
 
         elif name == "read-pdf":
             pdf_source = arguments.get("pdf_source", "")
