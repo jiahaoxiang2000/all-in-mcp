@@ -33,7 +33,7 @@ All tools are implemented as async MCP endpoints with proper validation and erro
 
 ### Prerequisites
 
-- Python 3.12 or higher
+- Python 3.10 or higher
 - UV package manager
 
 ### Installation
