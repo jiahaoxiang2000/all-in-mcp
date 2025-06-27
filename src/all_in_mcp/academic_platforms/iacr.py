@@ -141,7 +141,12 @@ class IACRSearcher(PaperSource):
             return None
 
     def search(
-        self, query: str, max_results: int = 10, fetch_details: bool = True
+        self,
+        query: str,
+        max_results: int = 10,
+        fetch_details: bool = True,
+        year_min: int | None = None,
+        year_max: int | None = None,
     ) -> list[Paper]:
         """
         Search IACR ePrint Archive
@@ -150,6 +155,8 @@ class IACRSearcher(PaperSource):
             query: Search query string
             max_results: Maximum number of results to return
             fetch_details: Whether to fetch detailed information for each paper (slower but more complete)
+            year_min: Minimum publication year (revised after)
+            year_max: Maximum publication year (revised before)
 
         Returns:
             List[Paper]: List of paper objects
@@ -158,7 +165,11 @@ class IACRSearcher(PaperSource):
 
         try:
             # Construct search parameters
-            params = {"q": query}
+            params: dict[str, str | int] = {"q": query}
+            if year_min:
+                params["revisedafter"] = year_min
+            if year_max:
+                params["revisedbefore"] = year_max
 
             # Make request
             response = self.session.get(self.IACR_SEARCH_URL, params=params)

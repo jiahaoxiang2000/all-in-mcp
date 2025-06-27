@@ -47,6 +47,14 @@ async def handle_list_tools() -> list[types.Tool]:
                         "description": "Whether to fetch detailed information for each paper (default: True)",
                         "default": True,
                     },
+                    "year_min": {
+                        "type": "integer",
+                        "description": "Minimum publication year (revised after)",
+                    },
+                    "year_max": {
+                        "type": "integer",
+                        "description": "Maximum publication year (revised before)",
+                    },
                 },
                 "required": ["query"],
             },
@@ -217,6 +225,8 @@ async def handle_call_tool(
             query = arguments.get("query", "")
             max_results = arguments.get("max_results", 10)
             fetch_details = arguments.get("fetch_details", True)
+            year_min = arguments.get("year_min")
+            year_max = arguments.get("year_max")
 
             if not query:
                 return [
@@ -225,17 +235,34 @@ async def handle_call_tool(
                     )
                 ]
 
-            papers = iacr_searcher.search(query, max_results, fetch_details)
+            papers = iacr_searcher.search(
+                query,
+                max_results=max_results,
+                fetch_details=fetch_details,
+                year_min=year_min,
+                year_max=year_max,
+            )
 
             if not papers:
+                year_filter_msg = ""
+                if year_min or year_max:
+                    year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
+                    year_filter_msg = f" in year range{year_range}"
                 return [
                     types.TextContent(
-                        type="text", text=f"No papers found for query: {query}"
+                        type="text",
+                        text=f"No papers found for query: {query}{year_filter_msg}",
                     )
                 ]
 
             # Format the results
-            result_text = f"Found {len(papers)} IACR papers for query '{query}':\n\n"
+            year_filter_msg = ""
+            if year_min or year_max:
+                year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
+                year_filter_msg = f" in year range{year_range}"
+            result_text = (
+                f"Found {len(papers)} IACR papers for query '{query}'{year_filter_msg}:\n\n"
+            )
             for i, paper in enumerate(papers, 1):
                 result_text += f"{i}. **{paper.title}**\n"
                 result_text += f"   - Paper ID: {paper.paper_id}\n"
