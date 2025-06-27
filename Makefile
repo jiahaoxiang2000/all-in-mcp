@@ -14,8 +14,6 @@ RED := \033[31m
 RESET := \033[0m
 
 help: ## Show this help message
-	@echo "$(BLUE)All-in-MCP Server - Makefile Commands$(RESET)"
-	@echo "$(YELLOW)Setup Commands:$(RESET)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(RESET) %s\n", $$1, $$2}'
 
 # Environment Setup
@@ -45,7 +43,6 @@ dev-setup: install-all ## Complete development environment setup
 	@echo "$(YELLOW)You can now run:$(RESET)"
 	@echo "  make run    - to start the MCP server"
 	@echo "  make test   - to run tests"
-	@echo "  make lint   - to check code quality"
 
 # Testing
 test: ## Run tests with pytest
@@ -55,23 +52,6 @@ test: ## Run tests with pytest
 test-verbose: ## Run tests with verbose output
 	@echo "$(BLUE)Running tests (verbose)...$(RESET)"
 	uv run pytest -v
-
-test-coverage: ## Run tests with coverage report
-	@echo "$(BLUE)Running tests with coverage...$(RESET)"
-	uv run pytest --cov=src/all_in_mcp --cov-report=html --cov-report=term
-
-# Code Quality
-lint: ## Run linting checks
-	@echo "$(BLUE)Running linting checks...$(RESET)"
-	@echo "$(YELLOW)Note: Install ruff/flake8 for full linting support$(RESET)"
-	uv run python -m py_compile src/all_in_mcp/*.py
-	uv run python -m py_compile tests/*.py
-
-format: ## Format code (requires black/ruff)
-	@echo "$(BLUE)Formatting code...$(RESET)"
-	@echo "$(YELLOW)Note: Install black or ruff for code formatting$(RESET)"
-
-check: test lint ## Run all checks (tests + linting)
 
 # Running the Server
 run: ## Run the All-in-MCP server
@@ -110,33 +90,8 @@ clean-all: clean ## Clean everything including uv cache
 	@echo "$(BLUE)Cleaning all caches...$(RESET)"
 	uv cache clean
 
-# Documentation
-docs: ## Generate documentation (placeholder)
-	@echo "$(BLUE)Documentation generation...$(RESET)"
-	@echo "$(YELLOW)Documentation files are in docs/ directory$(RESET)"
-	@ls -la docs/
-
-# Environment Information
-info: ## Show environment information
-	@echo "$(BLUE)Environment Information:$(RESET)"
-	@echo "$(YELLOW)Python version:$(RESET)"
-	@uv run python --version
-	@echo "$(YELLOW)UV version:$(RESET)"
-	@uv --version
-	@echo "$(YELLOW)Project dependencies:$(RESET)"
-	@uv tree --quiet 2>/dev/null || echo "Run 'make install' first"
-
 # Quick development workflow
 dev: dev-setup test-import run ## Complete dev setup and run server
-
-# Pre-commit setup (if using pre-commit hooks)
-pre-commit: ## Setup pre-commit hooks (requires pre-commit)
-	@echo "$(BLUE)Setting up pre-commit hooks...$(RESET)"
-	@echo "$(YELLOW)Note: Install pre-commit first: uv add --dev pre-commit$(RESET)"
-
-# Server health check
-health-check: test-import ## Check if server is healthy
-	@echo "$(GREEN)Server health check passed!$(RESET)"
 
 # Show project status
 status: ## Show project status
