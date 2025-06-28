@@ -28,8 +28,8 @@ All tools are implemented as async MCP endpoints with proper validation and erro
 
 ## Quick Start
 
-- [**Video for Env Setup**](https://www.bilibili.com/video/BV1cZKozaEjg)
-- [_Overview PDF_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/config.pdf)
+- [**Video for Env Setup**](https://www.bilibili.com/video/BV1cZKozaEjg) [**Video for Claude code**](https://www.bilibili.com/video/BV1s9KmzVEcE/)
+- [_Overview PDF_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/config.pdf) [_PDF for Claude code_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/config-claude.pdf)
 
 ### Prerequisites
 
@@ -44,17 +44,30 @@ Install from PyPI (Recommended by `UV`)
 uv pip install all-in-mcp
 ```
 
-### Integration with MCP Clients Vscode
+### Integration with MCP Clients
 
 Add this server to your MCP client configuration. The server runs using stdio transport.
 
-Example configuration for Vscode:
+#### VSCode Configuration
 
 ```json .vscode/mcp.json
 {
   "servers": {
     "all-in-mcp": {
       "type": "stdio",
+      "command": "uv",
+      "args": ["run", "all-in-mcp"]
+    }
+  }
+}
+```
+
+#### Claude Code Configuration
+
+```json .mcp.json
+{
+  "mcpServers": {
+    "all-in-mcp": {
       "command": "uv",
       "args": ["run", "all-in-mcp"]
     }
