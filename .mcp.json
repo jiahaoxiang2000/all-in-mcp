@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "APaper": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "all-in-mcp"],
+      "env": {}
+    }
+  }
+}
