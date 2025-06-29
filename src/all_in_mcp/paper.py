@@ -86,19 +86,21 @@ class Paper:
         return read_pdf(self.pdf_url)
 
 
-def read_pdf(pdf_source: str | Path) -> str:
+def read_pdf(pdf_source: str | Path, start_page: int | None = None, end_page: int | None = None) -> str:
     """
     Extract text content from a PDF file (local or online).
 
     Args:
         pdf_source: Path to local PDF file or URL to online PDF
+        start_page: Starting page number (1-indexed, inclusive). Defaults to 1.
+        end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
 
     Returns:
         str: Extracted text content from the PDF
 
     Raises:
         FileNotFoundError: If local file doesn't exist
-        ValueError: If URL is invalid or PDF cannot be processed
+        ValueError: If URL is invalid, PDF cannot be processed, or page range is invalid
         Exception: For other PDF processing errors
     """
     try:
@@ -109,10 +111,10 @@ def read_pdf(pdf_source: str | Path) -> str:
             parsed = urlparse(pdf_source_str)
             if parsed.scheme in ("http", "https"):
                 # Handle online PDF
-                return _read_pdf_from_url(pdf_source_str)
+                return _read_pdf_from_url(pdf_source_str, start_page, end_page)
             else:
                 # Handle local file
-                return _read_pdf_from_file(Path(pdf_source_str))
+                return _read_pdf_from_file(Path(pdf_source_str), start_page, end_page)
         else:
             raise ValueError("pdf_source must be a string or Path object")
 
@@ -120,7 +122,46 @@ def read_pdf(pdf_source: str | Path) -> str:
         raise Exception(f"Failed to read PDF from {pdf_source}: {e!s}") from e
 
 
-def _read_pdf_from_file(file_path: Path) -> str:
+def _normalize_page_range(start_page: int | None, end_page: int | None, total_pages: int) -> tuple[int, int]:
+    """
+    Normalize and validate page range parameters.
+    
+    Args:
+        start_page: Starting page number (1-indexed, inclusive) or None
+        end_page: Ending page number (1-indexed, inclusive) or None
+        total_pages: Total number of pages in the PDF
+        
+    Returns:
+        tuple[int, int]: (start_index, end_index) as 0-indexed values
+        
+    Raises:
+        ValueError: If page range is invalid
+    """
+    # Default values
+    if start_page is None:
+        start_page = 1
+    if end_page is None:
+        end_page = total_pages
+        
+    # Validate page numbers
+    if start_page < 1:
+        raise ValueError(f"start_page must be >= 1, got {start_page}")
+    if end_page < 1:
+        raise ValueError(f"end_page must be >= 1, got {end_page}")
+    if start_page > end_page:
+        raise ValueError(f"start_page ({start_page}) must be <= end_page ({end_page})")
+    if start_page > total_pages:
+        raise ValueError(f"start_page ({start_page}) exceeds total pages ({total_pages})")
+        
+    # Clamp end_page to total_pages
+    if end_page > total_pages:
+        end_page = total_pages
+        
+    # Convert to 0-indexed
+    return start_page - 1, end_page - 1
+
+
+def _read_pdf_from_file(file_path: Path, start_page: int | None = None, end_page: int | None = None) -> str:
     """Read PDF from local file path."""
     if not file_path.exists():
         raise FileNotFoundError(f"PDF file not found: {file_path}")
@@ -131,10 +172,16 @@ def _read_pdf_from_file(file_path: Path) -> str:
     try:
         with open(file_path, "rb") as file:
             pdf_reader = PdfReader(file)
+            total_pages = len(pdf_reader.pages)
+            
+            # Validate and normalize page range
+            start_idx, end_idx = _normalize_page_range(start_page, end_page, total_pages)
+            
             text_content = []
 
-            for page_num, page in enumerate(pdf_reader.pages):
+            for page_num in range(start_idx, end_idx + 1):
                 try:
+                    page = pdf_reader.pages[page_num]
                     page_text = page.extract_text()
                     if page_text.strip():  # Only add non-empty pages
                         text_content.append(
@@ -151,7 +198,7 @@ def _read_pdf_from_file(file_path: Path) -> str:
         raise Exception(f"Error reading PDF file {file_path}: {e!s}") from e
 
 
-def _read_pdf_from_url(url: str) -> str:
+def _read_pdf_from_url(url: str, start_page: int | None = None, end_page: int | None = None) -> str:
     """Download and read PDF from URL."""
     try:
         # Download PDF with proper headers
@@ -175,10 +222,16 @@ def _read_pdf_from_url(url: str) -> str:
             # Read PDF from bytes
             pdf_bytes = io.BytesIO(response.content)
             pdf_reader = PdfReader(pdf_bytes)
+            total_pages = len(pdf_reader.pages)
+            
+            # Validate and normalize page range
+            start_idx, end_idx = _normalize_page_range(start_page, end_page, total_pages)
+            
             text_content = []
 
-            for page_num, page in enumerate(pdf_reader.pages):
+            for page_num in range(start_idx, end_idx + 1):
                 try:
+                    page = pdf_reader.pages[page_num]
                     page_text = page.extract_text()
                     if page_text.strip():  # Only add non-empty pages
                         text_content.append(

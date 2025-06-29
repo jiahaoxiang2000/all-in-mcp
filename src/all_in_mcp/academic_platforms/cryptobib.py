@@ -364,9 +364,15 @@ class CryptoBibSearcher(PaperSource):
         """
         return "Error: CryptoBib is a bibliography database and doesn't provide PDF downloads"
 
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str = "./downloads", start_page: int | None = None, end_page: int | None = None) -> str:
         """
         CryptoBib doesn't provide paper content reading
+        
+        Args:
+            paper_id: Paper identifier
+            save_path: Directory where papers are stored
+            start_page: Starting page number (1-indexed, inclusive). Defaults to 1.
+            end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
         """
         return "Error: CryptoBib is a bibliography database and doesn't provide paper content"
 

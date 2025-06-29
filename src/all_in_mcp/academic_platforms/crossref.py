@@ -228,9 +228,15 @@ class CrossrefSearcher(PaperSource):
         """
         return "Crossref does not provide a direct way to download PDFs. Use the paper's URL or DOI to access the publisher's site for PDF downloads if available."
 
-    def read_paper(self, paper_id: str, save_path: str) -> str:
+    def read_paper(self, paper_id: str, save_path: str, start_page: int | None = None, end_page: int | None = None) -> str:
         """
         crossref doesn't provide a direct way to read paper text.
+        
+        Args:
+            paper_id: Paper identifier
+            save_path: Directory where papers are stored
+            start_page: Starting page number (1-indexed, inclusive). Defaults to 1.
+            end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
         """
         return "Crossref does not provide a direct way to read paper text. Use the download_pdf method to get the PDF if available."
 

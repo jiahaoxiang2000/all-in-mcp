@@ -12,6 +12,7 @@ from src.all_in_mcp.paper import (
     Paper,
     read_pdf,
     _read_pdf_from_file,
+    _normalize_page_range,
     _read_pdf_from_url,
 )
 
@@ -113,14 +114,14 @@ class TestReadPdfFunctionality:
             mock_url_reader.return_value = "Mock PDF content"
             result = read_pdf("http://example.com/test.pdf")
             assert result == "Mock PDF content"
-            mock_url_reader.assert_called_once_with("http://example.com/test.pdf")
+            mock_url_reader.assert_called_once_with("http://example.com/test.pdf", None, None)
 
         # Test HTTPS URL
         with patch("src.all_in_mcp.paper._read_pdf_from_url") as mock_url_reader:
             mock_url_reader.return_value = "Mock PDF content"
             result = read_pdf("https://example.com/test.pdf")
             assert result == "Mock PDF content"
-            mock_url_reader.assert_called_once_with("https://example.com/test.pdf")
+            mock_url_reader.assert_called_once_with("https://example.com/test.pdf", None, None)
 
     def test_read_pdf_local_file_detection(self):
         """Test local file detection in read_pdf function"""
@@ -129,6 +130,28 @@ class TestReadPdfFunctionality:
             result = read_pdf("/path/to/local/file.pdf")
             assert result == "Mock PDF content"
             mock_file_reader.assert_called_once()
+
+    def test_read_pdf_with_page_range(self):
+        """Test read_pdf with page range parameters"""
+        with patch("src.all_in_mcp.paper._read_pdf_from_url") as mock_url_reader:
+            mock_url_reader.return_value = "Mock PDF content pages 2-5"
+            result = read_pdf("http://example.com/test.pdf", start_page=2, end_page=5)
+            assert result == "Mock PDF content pages 2-5"
+            mock_url_reader.assert_called_once_with("http://example.com/test.pdf", 2, 5)
+
+    def test_read_pdf_with_start_page_only(self):
+        """Test read_pdf with only start_page parameter"""
+        with patch("src.all_in_mcp.paper._read_pdf_from_file") as mock_file_reader:
+            mock_file_reader.return_value = "Mock PDF content from page 3"
+            result = read_pdf("/path/to/file.pdf", start_page=3)
+            assert result == "Mock PDF content from page 3"
+
+    def test_read_pdf_with_end_page_only(self):
+        """Test read_pdf with only end_page parameter"""
+        with patch("src.all_in_mcp.paper._read_pdf_from_file") as mock_file_reader:
+            mock_file_reader.return_value = "Mock PDF content up to page 10"
+            result = read_pdf("/path/to/file.pdf", end_page=10)
+            assert result == "Mock PDF content up to page 10"
 
     def test_paper_with_pdf_url_success(self):
         """Test Paper.read_content() with valid PDF URL"""
@@ -149,3 +172,57 @@ class TestReadPdfFunctionality:
             result = paper.read_content()
             assert result == "Mock PDF content"
             mock_read_pdf.assert_called_once_with("https://example.com/test.pdf")
+
+
+class TestPageRangeValidation:
+    """Test page range validation functionality"""
+    
+    def test_normalize_page_range_defaults(self):
+        """Test normalize_page_range with default values"""
+        start_idx, end_idx = _normalize_page_range(None, None, 10)
+        assert start_idx == 0  # 1 -> 0-indexed
+        assert end_idx == 9    # 10 -> 0-indexed
+    
+    def test_normalize_page_range_valid_range(self):
+        """Test normalize_page_range with valid range"""
+        start_idx, end_idx = _normalize_page_range(3, 7, 10)
+        assert start_idx == 2  # 3 -> 0-indexed
+        assert end_idx == 6    # 7 -> 0-indexed
+    
+    def test_normalize_page_range_start_only(self):
+        """Test normalize_page_range with only start_page"""
+        start_idx, end_idx = _normalize_page_range(5, None, 10)
+        assert start_idx == 4  # 5 -> 0-indexed
+        assert end_idx == 9    # 10 -> 0-indexed
+    
+    def test_normalize_page_range_end_only(self):
+        """Test normalize_page_range with only end_page"""
+        start_idx, end_idx = _normalize_page_range(None, 8, 10)
+        assert start_idx == 0  # 1 -> 0-indexed
+        assert end_idx == 7    # 8 -> 0-indexed
+    
+    def test_normalize_page_range_clamp_end_page(self):
+        """Test normalize_page_range clamps end_page to total pages"""
+        start_idx, end_idx = _normalize_page_range(1, 15, 10)
+        assert start_idx == 0  # 1 -> 0-indexed
+        assert end_idx == 9    # 10 -> 0-indexed (clamped from 15)
+    
+    def test_normalize_page_range_invalid_start_too_small(self):
+        """Test normalize_page_range with start_page < 1"""
+        with pytest.raises(ValueError, match="start_page must be >= 1"):
+            _normalize_page_range(0, 5, 10)
+    
+    def test_normalize_page_range_invalid_end_too_small(self):
+        """Test normalize_page_range with end_page < 1"""
+        with pytest.raises(ValueError, match="end_page must be >= 1"):
+            _normalize_page_range(1, 0, 10)
+    
+    def test_normalize_page_range_invalid_start_greater_than_end(self):
+        """Test normalize_page_range with start_page > end_page"""
+        with pytest.raises(ValueError, match="start_page \\(5\\) must be <= end_page \\(3\\)"):
+            _normalize_page_range(5, 3, 10)
+    
+    def test_normalize_page_range_invalid_start_exceeds_total(self):
+        """Test normalize_page_range with start_page > total_pages"""
+        with pytest.raises(ValueError, match="start_page \\(15\\) exceeds total pages \\(10\\)"):
+            _normalize_page_range(15, 20, 10)

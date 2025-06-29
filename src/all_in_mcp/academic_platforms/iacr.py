@@ -232,13 +232,15 @@ class IACRSearcher(PaperSource):
             logger.error(f"PDF download error: {e}")
             return f"Error downloading PDF: {e}"
 
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str = "./downloads", start_page: int | None = None, end_page: int | None = None) -> str:
         """
         Download and extract text from IACR paper PDF
 
         Args:
             paper_id: IACR paper ID
             save_path: Directory to save downloaded PDF
+            start_page: Starting page number (1-indexed, inclusive). Defaults to 1.
+            end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
 
         Returns:
             str: Extracted text from the PDF or error message
@@ -249,56 +251,24 @@ class IACRSearcher(PaperSource):
             if not paper or not paper.pdf_url:
                 return f"Error: Could not find PDF URL for paper {paper_id}"
 
-            # Download the PDF
-            pdf_response = requests.get(paper.pdf_url, timeout=30)
-            pdf_response.raise_for_status()
+            # Import read_pdf function
+            from ..paper import read_pdf
 
-            # Create download directory if it doesn't exist
-            os.makedirs(save_path, exist_ok=True)
-
-            # Save the PDF
-            filename = f"iacr_{paper_id.replace('/', '_')}.pdf"
-            pdf_path = os.path.join(save_path, filename)
-
-            with open(pdf_path, "wb") as f:
-                f.write(pdf_response.content)
-
-            # Extract text using pypdf
-            reader = PdfReader(pdf_path)
-            text = ""
-
-            for page_num, page in enumerate(reader.pages):
-                try:
-                    page_text = page.extract_text()
-                    if page_text:
-                        text += f"\n--- Page {page_num + 1} ---\n"
-                        text += page_text + "\n"
-                except Exception as e:
-                    logger.warning(
-                        f"Failed to extract text from page {page_num + 1}: {e}"
-                    )
-                    continue
-
-            if not text.strip():
-                return (
-                    f"PDF downloaded to {pdf_path}, but unable to extract readable text"
-                )
+            # Use the read_pdf function to extract text
+            text = read_pdf(paper.pdf_url, start_page, end_page)
 
             # Add paper metadata at the beginning
             metadata = f"Title: {paper.title}\n"
             metadata += f"Authors: {', '.join(paper.authors)}\n"
             metadata += f"Published Date: {paper.published_date}\n"
             metadata += f"URL: {paper.url}\n"
-            metadata += f"PDF downloaded to: {pdf_path}\n"
+            metadata += f"PDF URL: {paper.pdf_url}\n"
             metadata += "=" * 80 + "\n\n"
 
-            return metadata + text.strip()
+            return metadata + text
 
-        except requests.RequestException as e:
-            logger.error(f"Error downloading PDF: {e}")
-            return f"Error downloading PDF: {e}"
         except Exception as e:
-            logger.error(f"Read paper error: {e}")
+            logger.error(f"Error reading paper: {e}")
             return f"Error reading paper: {e}"
 
     def get_paper_details(self, paper_id: str) -> Paper | None:

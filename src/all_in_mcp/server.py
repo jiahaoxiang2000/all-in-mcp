@@ -93,6 +93,16 @@ async def handle_list_tools() -> list[types.Tool]:
                         "description": "Directory where the PDF is/will be saved (default: './downloads')",
                         "default": "./downloads",
                     },
+                    "start_page": {
+                        "type": "integer",
+                        "description": "Starting page number (1-indexed, inclusive). Defaults to 1.",
+                        "minimum": 1,
+                    },
+                    "end_page": {
+                        "type": "integer",
+                        "description": "Ending page number (1-indexed, inclusive). Defaults to last page.",
+                        "minimum": 1,
+                    },
                 },
                 "required": ["paper_id"],
             },
@@ -203,6 +213,16 @@ async def handle_list_tools() -> list[types.Tool]:
                         "type": "string",
                         "description": "Path to local PDF file or URL to online PDF",
                     },
+                    "start_page": {
+                        "type": "integer",
+                        "description": "Starting page number (1-indexed, inclusive). Defaults to 1.",
+                        "minimum": 1,
+                    },
+                    "end_page": {
+                        "type": "integer",
+                        "description": "Ending page number (1-indexed, inclusive). Defaults to last page.",
+                        "minimum": 1,
+                    },
                 },
                 "required": ["pdf_source"],
             },
@@ -306,6 +326,8 @@ async def handle_call_tool(
         elif name == "read-iacr-paper":
             paper_id = arguments.get("paper_id", "")
             save_path = arguments.get("save_path", "./downloads")
+            start_page = arguments.get("start_page")
+            end_page = arguments.get("end_page")
 
             if not paper_id:
                 return [
@@ -314,7 +336,7 @@ async def handle_call_tool(
                     )
                 ]
 
-            result = iacr_searcher.read_paper(paper_id, save_path)
+            result = iacr_searcher.read_paper(paper_id, save_path, start_page=start_page, end_page=end_page)
 
             if result.startswith("Error"):
                 return [types.TextContent(type="text", text=result)]
@@ -577,6 +599,8 @@ async def handle_call_tool(
 
         elif name == "read-pdf":
             pdf_source = arguments.get("pdf_source", "")
+            start_page = arguments.get("start_page")
+            end_page = arguments.get("end_page")
 
             if not pdf_source:
                 return [
@@ -586,7 +610,7 @@ async def handle_call_tool(
                 ]
 
             try:
-                result = read_pdf(pdf_source)
+                result = read_pdf(pdf_source, start_page=start_page, end_page=end_page)
                 return [types.TextContent(type="text", text=result)]
 
             except Exception as e:
