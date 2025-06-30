@@ -5,6 +5,8 @@ An MCP (Model Context Protocol) server that provides utility functions, includin
 - [**Paper Tools overview _Video_**](https://www.bilibili.com/video/BV1RMKWzdEk8)
 - [_Overview PDF_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/setup.pdf)
 
+![APaper Research Direction](docs/APaper-research-direction-7x-2k-extended.gif)
+
 ## Features
 
 This MCP server exposes the following daily-use utility tools as MCP endpoints:
