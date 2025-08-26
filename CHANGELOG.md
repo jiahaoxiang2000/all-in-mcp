@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+---
+
+## [0.3.0] - 2025-08-26
+
 ### 🚀 Features
 
 - 🚀 feat: migrate to FastMCP architecture with modular APaper design
@@ -18,6 +22,7 @@ All notable changes to this project will be documented in this file.
 ### 📚 Documentation
 
 - 📚 docs: update README for FastMCP architecture and MCP Inspector
+- 📝 docs: reorganize CHANGELOG.md for better readability
 
 ### 🏗️ Maintenance
 
