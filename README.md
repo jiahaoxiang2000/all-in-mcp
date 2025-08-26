@@ -22,18 +22,18 @@ Both servers expose academic paper search tools as FastMCP endpoints with automa
 
 ### Available Tools
 
-- **Academic Research**:
-  - `search-iacr-papers`: Search academic papers from IACR ePrint Archive
-  - `download-iacr-paper`: Download PDF of an IACR ePrint paper
-  - `read-iacr-paper`: Read and extract text content from an IACR ePrint paper PDF
-- **Bibliography Search**:
-  - `search-cryptobib-papers`: Search CryptoBib bibliography database for cryptography papers (structured metadata or raw BibTeX)
-- **Crossref Search**:
-  - `search-crossref-papers`: Search academic papers from Crossref database
-- **Google Scholar**:
-  - `search-google-scholar-papers`: Search academic papers across disciplines with citation data
-- **PDF Reading**:
-  - `read-pdf`: Read and extract text from local and online PDF files
+| Category                  | Tool Name                               | Description                                                    | Backend         |
+| ------------------------- | --------------------------------------- | -------------------------------------------------------------- | --------------- |
+| **Academic Research**     | `apaper_search_iacr_papers`             | Search academic papers from IACR ePrint Archive                | APaper          |
+|                           | `apaper_download_iacr_paper`            | Download PDF of an IACR ePrint paper                           | APaper          |
+|                           | `apaper_read_iacr_paper`                | Read and extract text content from an IACR ePrint paper PDF    | APaper          |
+| **Bibliography Search**   | `apaper_search_cryptobib_papers`        | Search CryptoBib bibliography database for cryptography papers | APaper          |
+| **Cross-platform Search** | `apaper_search_crossref_papers`         | Search academic papers from Crossref database                  | APaper          |
+|                           | `apaper_search_google_scholar_papers`   | Search academic papers across disciplines with citation data   | APaper          |
+| **PDF Processing**        | `apaper_read_pdf_file`                  | Read and extract text from local and online PDF files          | APaper          |
+| **GitHub Repository**     | `github-repo-mcp_getRepoAllDirectories` | Get all directories from a GitHub repository                   | GitHub-Repo-MCP |
+|                           | `github-repo-mcp_getRepoDirectories`    | Get directories from a specific path in GitHub repository      | GitHub-Repo-MCP |
+|                           | `github-repo-mcp_getRepoFile`           | Get file content from GitHub repository                        | GitHub-Repo-MCP |
 
 All tools are implemented using FastMCP decorators with automatic registration, built-in validation, and enhanced error handling.
 
@@ -45,33 +45,8 @@ All tools are implemented using FastMCP decorators with automatic registration, 
 ### Prerequisites
 
 - Python 3.10 or higher
-- UV package manager
-
-### Installation
-
-Install from PyPI (Recommended by `UV`)
-
-```bash
-uv pip install all-in-mcp
-```
-
-### Server Options
-
-The main proxy server supports multiple MCP backends through environment variables:
-
-```bash
-# Run with APaper academic tools enabled
-APAPER=true uv run all-in-mcp
-
-# Run with GitHub repository tools enabled
-GITHUB_REPO_MCP=true uv run all-in-mcp
-
-# Run with both backends enabled
-APAPER=true GITHUB_REPO_MCP=true uv run all-in-mcp
-
-# Run standalone APaper server (academic tools only)
-uv run apaper
-```
+- `pipx` for Python package installation
+- `npx` for MCP Inspector (Node.js required)
 
 ### Integration with MCP Clients
 
@@ -84,7 +59,7 @@ Add the servers to your MCP client configuration:
   "servers": {
     "all-in-mcp": {
       "type": "stdio",
-      "command": "uv",
+      "command": "pipx",
       "args": ["run", "all-in-mcp"],
       "env": {
         "APAPER": "true",
@@ -102,7 +77,7 @@ Add the servers to your MCP client configuration:
   "mcpServers": {
     "all-in-mcp": {
       "type": "stdio",
-      "command": "uv",
+      "command": "pipx",
       "args": ["run", "all-in-mcp"],
       "env": {
         "APAPER": "true",
@@ -113,6 +88,26 @@ Add the servers to your MCP client configuration:
 }
 ```
 
+### Server Options
+
+The main proxy server supports multiple MCP backends through environment variables:
+
+```bash
+# Run with APaper academic tools enabled
+APAPER=true pipx run all-in-mcp
+
+# Run with GitHub repository tools enabled
+GITHUB_REPO_MCP=true pipx run all-in-mcp
+
+# Run with both backends enabled
+APAPER=true GITHUB_REPO_MCP=true pipx run all-in-mcp
+
+# Run standalone APaper server (academic tools only)
+pipx run apaper
+```
+
+> **Note**: If you have the package installed globally, you can also run directly: `all-in-mcp` or `apaper`
+
 ## Debugging & Testing
 
 ### MCP Inspector
@@ -121,13 +116,13 @@ Use the official MCP Inspector to debug and test server functionality:
 
 ```bash
 # Debug the main proxy server with APaper tools
-APAPER=true npx @modelcontextprotocol/inspector uv run all-in-mcp
+APAPER=true npx @modelcontextprotocol/inspector pipx run all-in-mcp
 
 # Debug with all backends enabled
-APAPER=true GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector uv run all-in-mcp
+APAPER=true GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector pipx run all-in-mcp
 
 # Debug standalone APaper server
-npx @modelcontextprotocol/inspector uv run apaper
+npx @modelcontextprotocol/inspector pipx run apaper
 ```
 
 The MCP Inspector provides:
