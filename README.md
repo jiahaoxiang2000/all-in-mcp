@@ -2,6 +2,7 @@
 
 A FastMCP-based Model Context Protocol (MCP) server providing academic paper search and PDF processing utilities. Features a modular architecture with both proxy and standalone server capabilities.
 
+- [_All-in-MCP Introduction Slides_](docs/slide/intro.pdf)
 - [**Paper Tools overview _Video_**](https://www.bilibili.com/video/BV1RMKWzdEk8)
 - [_Overview PDF_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/setup.pdf)
 
@@ -52,7 +53,7 @@ All tools are implemented using FastMCP decorators with automatic registration, 
 
 Add the servers to your MCP client configuration:
 
-#### VSCode Configuration
+#### VSCode Configuration (.vscode/mcp.json)
 
 ```json .vscode/mcp.json
 {
@@ -70,7 +71,7 @@ Add the servers to your MCP client configuration:
 }
 ```
 
-#### Claude Code Configuration
+#### Claude Code Configuration (.mcp.json)
 
 ```json .mcp.json
 {
