@@ -3,10 +3,17 @@
 A FastMCP-based Model Context Protocol (MCP) server providing academic paper search and PDF processing utilities. Features a modular architecture with both proxy and standalone server capabilities.
 
 - [_All-in-MCP Introduction Slides_](docs/slide/intro.pdf)
+- [**Introduction Video on Bilibili**](https://www.bilibili.com/video/BV1ZcvNzSEX5/)
+
+<details>
+<summary>APaper Module Introduction</summary>
+
 - [**Paper Tools overview _Video_**](https://www.bilibili.com/video/BV1RMKWzdEk8)
 - [_Overview PDF_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/setup.pdf)
 
 ![APaper Research Direction](docs/APaper-research-direction-7x-2k-extended.gif)
+
+</details>
 
 ## Architecture
 
