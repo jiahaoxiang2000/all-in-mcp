@@ -1,10 +1,13 @@
 {
   "mcpServers": {
-    "APaper": {
+    "all-in-mcp": {
       "type": "stdio",
       "command": "uv",
       "args": ["run", "all-in-mcp"],
-      "env": {}
+      "env": {
+        "APAPER": "true",
+        "GITHUB_REPO_MCP": "true"
+      }
     }
   }
 }

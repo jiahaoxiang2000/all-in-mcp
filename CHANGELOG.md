@@ -6,25 +6,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### 🚀 Major Changes
+### 🚀 Features
 
-- **FastMCP Architecture**: Migrated to FastMCP framework for better performance and simplified development
-- **Module Isolation**: Created dedicated `apaper` module for academic functionality
-- **Proxy Server**: Transformed all-in-mcp into FastMCP proxy server supporting multiple backends
-- **Dependencies Cleanup**: Reduced from 9 to 5 core dependencies, removed unused packages (mcp, feedparser, psutil, pytest)
+- 🚀 feat: migrate to FastMCP architecture with modular APaper design
+- ✨ feat: update README with APaper research direction image and bump version to 0.2.8
 
-### ✨ New Features
+### 🔧 Fixes & Improvements
 
-- Dual entry points: `all-in-mcp` (proxy) and `apaper` (standalone) servers
-- Automatic tool registration with `@app.tool()` decorators
-- Modular academic platform design in `apaper/platforms/`
-- Switched from pytest to unittest for simpler testing
+- 🔧 refactor: migrate to ProxyClient architecture and fix imports
 
-### 💥 Breaking Changes
+### 📚 Documentation
 
-- Academic functionality moved to `apaper` module
-- Some optional dependencies removed
-- Complete FastMCP migration (API compatibility maintained)
+- 📚 docs: update README for FastMCP architecture and MCP Inspector
+
+### 🏗️ Maintenance
+
+- bump version to 0.2.8
 
 ---
 
