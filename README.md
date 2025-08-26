@@ -1,15 +1,24 @@
 # All-in-MCP
 
-An MCP (Model Context Protocol) server that provides utility functions, including academic paper search capabilities.
+A FastMCP-based Model Context Protocol (MCP) server providing academic paper search and PDF processing utilities. Features a modular architecture with both proxy and standalone server capabilities.
 
 - [**Paper Tools overview _Video_**](https://www.bilibili.com/video/BV1RMKWzdEk8)
 - [_Overview PDF_](https://github.com/jiahaoxiang2000/tutor/blob/main/Apaper/setup.pdf)
 
 ![APaper Research Direction](docs/APaper-research-direction-7x-2k-extended.gif)
 
+## Architecture
+
+All-in-MCP uses a modern **FastMCP architecture** with two main components:
+
+1. **🔄 All-in-MCP Proxy Server**: Main server that routes requests to academic tools
+2. **📚 APaper Module**: Isolated academic research server with specialized paper search tools
+
+This design provides better modularity, performance, and scalability.
+
 ## Features
 
-This MCP server exposes the following daily-use utility tools as MCP endpoints:
+Both servers expose academic paper search tools as FastMCP endpoints with automatic tool registration:
 
 ### Available Tools
 
@@ -26,7 +35,7 @@ This MCP server exposes the following daily-use utility tools as MCP endpoints:
 - **PDF Reading**:
   - `read-pdf`: Read and extract text from local and online PDF files
 
-All tools are implemented as async MCP endpoints with proper validation and error handling.
+All tools are implemented using FastMCP decorators with automatic registration, built-in validation, and enhanced error handling.
 
 ## Quick Start
 
@@ -46,9 +55,19 @@ Install from PyPI (Recommended by `UV`)
 uv pip install all-in-mcp
 ```
 
+### Server Options
+
+You can run either server depending on your needs:
+
+```bash
+# Main proxy server (recommended) - routes to all academic tools
+uv run all-in-mcp
+
+```
+
 ### Integration with MCP Clients
 
-Add this server to your MCP client configuration. The server runs using stdio transport.
+Add the servers to your MCP client configuration:
 
 #### VSCode Configuration
 
@@ -77,6 +96,27 @@ Add this server to your MCP client configuration. The server runs using stdio tr
 }
 ```
 
+## Debugging & Testing
+
+### MCP Inspector
+
+Use the official MCP Inspector to debug and test server functionality:
+
+```bash
+# Debug the main proxy server
+npx @modelcontextprotocol/inspector uv run all-in-mcp
+
+```
+
+The MCP Inspector provides:
+
+- 🔍 **Interactive Tool Testing**: Test all available tools with real parameters
+- 📊 **Server Information**: View server capabilities and tool schemas
+- 🐛 **Debug Messages**: Monitor server communication and error messages
+- ⚡ **Real-time Testing**: Execute tools and see results immediately
+
+Perfect for development, debugging, and understanding how the FastMCP tools work.
+
 <details>
 <summary>Development</summary>
 
@@ -92,8 +132,10 @@ cd all-in-mcp
 # Install with development dependencies
 uv sync --extra dev
 
-# Run tests
-uv run pytest
+# Run tests (now using unittest)
+uv run python tests/test_fastmcp_server.py
+uv run python tests/test_apaper_iacr.py
+uv run python tests/test_apaper_pdf.py
 ```
 
 </details>
