@@ -29,12 +29,11 @@ classifiers = [
     "Topic :: Text Processing :: General",
 ]
 dependencies = [
-    "mcp>=1.9.4",
     "requests>=2.31.0",
-    "feedparser>=6.0.10",
     "beautifulsoup4>=4.12.0",
     "pypdf>=4.0.0",
     "httpx>=0.24.0",
+    "fastmcp>=2.11.3",
 ]
 
 [project.urls]
@@ -44,16 +43,10 @@ Documentation = "https://github.com/jiahaoxiang2000/all-in-mcp/tree/main/docs"
 Issues = "https://github.com/jiahaoxiang2000/all-in-mcp/issues"
 
 [project.optional-dependencies]
-system = ["psutil>=5.9.0"]
-all = ["psutil>=5.9.0"]
 dev = [
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.21.0",
-    "pytest-cov>=4.1.0",
     "ruff>=0.1.0",
     "mypy>=1.5.0",
     "build>=1.0.0",
-    "twine>=4.0.0",
 ]
 
 [build-system]
@@ -61,13 +54,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/all_in_mcp"]
+packages = ["src/all_in_mcp", "src/apaper"]
 
 [tool.hatch.build.targets.sdist]
 include = ["/src", "/README.md", "/pyproject.toml", "/docs"]
 
 [project.scripts]
 all-in-mcp = "all_in_mcp:main"
+apaper = "apaper:main"
 
 [tool.ruff]
 line-length = 88
@@ -111,25 +105,6 @@ warn_no_return = true
 warn_unreachable = true
 strict_equality = true
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_functions = "test_*"
-addopts = "--verbose --tb=short"
-asyncio_mode = "auto"
+# Tests use unittest - run with: uv run python tests/test_*.py
 
-[tool.coverage.run]
-source = ["src/all_in_mcp"]
-omit = ["tests/*", "scripts/*"]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-]
+# Coverage configuration removed - not using pytest-cov

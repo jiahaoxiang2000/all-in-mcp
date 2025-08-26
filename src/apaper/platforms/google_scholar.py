@@ -8,7 +8,7 @@ from typing import Optional
 import requests
 from bs4 import BeautifulSoup
 
-from ..paper import Paper
+from ..models.paper import Paper
 from .base import PaperSource
 
 logger = logging.getLogger(__name__)

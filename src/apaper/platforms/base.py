@@ -1,7 +1,7 @@
-# all_in_mcp/academic_platforms/base.py
+# apaper/platforms/base.py
 from abc import ABC, abstractmethod
 
-from ..paper import Paper
+from ..models.paper import Paper
 
 
 class PaperSource(ABC):

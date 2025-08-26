@@ -1,4 +1,4 @@
-# all_in_mcp/academic_platforms/iacr.py
+# apaper/platforms/iacr.py
 import logging
 import os
 import random
@@ -9,7 +9,8 @@ import requests
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
-from ..paper import Paper
+from ..models.paper import Paper
+from ..utils.pdf_reader import read_pdf
 from .base import PaperSource
 
 logger = logging.getLogger(__name__)
@@ -250,9 +251,6 @@ class IACRSearcher(PaperSource):
             paper = self.get_paper_details(paper_id)
             if not paper or not paper.pdf_url:
                 return f"Error: Could not find PDF URL for paper {paper_id}"
-
-            # Import read_pdf function
-            from ..paper import read_pdf
 
             # Use the read_pdf function to extract text
             text = read_pdf(paper.pdf_url, start_page, end_page)

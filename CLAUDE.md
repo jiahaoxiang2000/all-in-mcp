@@ -4,31 +4,57 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-All-in-MCP is a Model Context Protocol (MCP) server that provides academic paper search and PDF processing utilities. The server exposes tools for searching papers from multiple academic platforms (IACR, CryptoBib, Crossref, Google Scholar) and processing PDF documents.
+All-in-MCP is a FastMCP-based Model Context Protocol (MCP) proxy server that provides academic paper search and PDF processing utilities. The project has been restructured into two main components:
 
-## Core Architecture
+1. **APaper**: An isolated academic research module with tools for searching papers from multiple academic platforms
+2. **All-in-MCP Proxy**: A FastMCP proxy server that forwards requests to APaper and other MCP servers
 
-### MCP Server Structure
+The system uses the FastMCP framework for simplified MCP server development with automatic tool registration, enhanced features, and better performance.
 
-- **Entry Point**: `src/all_in_mcp/server.py` - Main MCP server implementation
-- **Tool Registration**: Tools are registered with JSON schemas in `handle_list_tools()`
-- **Request Handling**: Tool calls are routed through `handle_call_tool()`
-- **Data Model**: `src/all_in_mcp/paper.py` - Standardized `Paper` dataclass for all platforms
+## New Architecture (FastMCP-based)
 
-### Academic Platform Architecture
+### APaper Module Structure
 
-- **Base Class**: `src/all_in_mcp/academic_platforms/base.py` - Abstract `PaperSource` class
-- **Platform Implementations**: Each academic platform inherits from `PaperSource` and implements:
-  - `search(query, **kwargs) -> list[Paper]`
-  - `download_pdf(paper_id, save_path) -> str`
-  - `read_paper(paper_id, save_path) -> str`
+```
+src/apaper/
+├── __init__.py              # APaper package entry point
+├── server.py               # FastMCP-based APaper server
+├── models/
+│   ├── __init__.py
+│   └── paper.py           # Standardized Paper dataclass
+├── platforms/             # Academic platform implementations
+│   ├── __init__.py
+│   ├── base.py           # Abstract PaperSource class
+│   ├── iacr.py          # IACR ePrint Archive integration
+│   ├── cryptobib.py     # Cryptography bibliography database
+│   ├── crossref.py      # Crossref academic database
+│   └── google_scholar.py # Google Scholar search
+└── utils/
+    ├── __init__.py
+    └── pdf_reader.py     # PDF processing utilities
+```
 
-### Available Platforms
+### All-in-MCP Proxy Structure
 
-- **IACR**: `academic_platforms/iacr.py` - IACR ePrint Archive integration
-- **CryptoBib**: `academic_platforms/cryptobib.py` - Cryptography bibliography database
-- **Crossref**: `academic_platforms/crossref.py` - Crossref academic database
-- **Google Scholar**: `academic_platforms/google_scholar.py` - Google Scholar search
+```
+src/all_in_mcp/
+├── __init__.py             # Package entry point
+└── server.py              # FastMCP proxy server that imports APaper tools
+```
+
+### FastMCP Server Implementation
+
+- **APaper Server**: `src/apaper/server.py` - Dedicated academic research server using FastMCP decorators
+- **Proxy Server**: `src/all_in_mcp/server.py` - Main proxy server that imports and exposes APaper functionality
+- **Tool Registration**: Uses FastMCP `@app.tool()` decorators for automatic tool registration
+- **Data Model**: `src/apaper/models/paper.py` - Standardized `Paper` dataclass
+
+### Available Academic Platforms
+
+- **IACR**: `apaper/platforms/iacr.py` - IACR ePrint Archive integration
+- **CryptoBib**: `apaper/platforms/cryptobib.py` - Cryptography bibliography database
+- **Crossref**: `apaper/platforms/crossref.py` - Crossref academic database
+- **Google Scholar**: `apaper/platforms/google_scholar.py` - Google Scholar search
 
 ## Development Commands
 
@@ -46,36 +72,35 @@ make install-all
 
 ```bash
 # Run all tests
-uv run pytest
+uv run python tests/test_fastmcp_server.py
 
-# Run tests with verbose output
-uv run pytest -v
+# Run APaper-specific tests
+uv run python tests/test_apaper_iacr.py
+uv run python tests/test_apaper_pdf.py
 
-# Run specific test file
-uv run pytest tests/test_iacr.py
-
-# Using make commands
+# Using make commands (if available)
 make test
 make test-verbose
 ```
 
-### Running the Server
+### Running the Servers
 
 ```bash
-# Run MCP server
+# Run the main all-in-mcp proxy server
 uv run all-in-mcp
 
-# Run with debug output
-make run-debug
+# Run the isolated APaper server directly
+uv run apaper
 
-# Test server import
-make test-import
+# Test server imports
+uv run python -c "import all_in_mcp.server; print('Proxy server OK')"
+uv run python -c "import apaper.server; print('APaper server OK')"
 ```
 
 ### Building and Distribution
 
 ```bash
-# Build package
+# Build package (includes both all-in-mcp and apaper)
 uv build
 make build
 
@@ -83,32 +108,26 @@ make build
 make clean
 ```
 
-## Adding New Academic Platforms
-
-1. Create new platform class in `academic_platforms/` inheriting from `PaperSource`
-2. Implement required methods: `search()`, `download_pdf()`, `read_paper()`
-3. Add platform import and initialization in `server.py`
-4. Register new tools in `handle_list_tools()` and `handle_call_tool()`
-5. Add comprehensive tests in `tests/test_<platform>.py`
-
 ## Testing Strategy
 
-- **Unit Tests**: Located in `tests/` directory, using pytest framework
-- **Test Structure**: One test file per platform (e.g., `test_iacr.py`)
-- **Async Support**: Tests support async operations with `asyncio_mode = "auto"`
-- **Mocking**: Use `@patch` for external API calls during testing
-
-## Configuration
-
-- **Dependencies**: Managed in `pyproject.toml` with separate dev/system extras
-- **Code Style**: Ruff formatting and linting configured in `pyproject.toml`
-- **Type Checking**: MyPy configuration in `pyproject.toml`
-- **Test Config**: Pytest configuration in `pytest.ini` and `pyproject.toml`
+- **Unit Tests**: Located in `tests/` directory
+- **New Test Structure**:
+  - `test_apaper_*`: Tests for APaper module functionality
+  - `test_fastmcp_server.py`: Tests for FastMCP server functionality
+- **Test Execution**: Use `uv run python` for individual test files
 
 ## Key Implementation Details
 
-- All academic platforms return standardized `Paper` objects with consistent fields
-- PDF processing uses `pypdf` library for text extraction
-- HTTP requests use `httpx` for async support
-- MCP server follows stdio transport protocol
-- Error handling includes graceful degradation for network issues
+### FastMCP Benefits
+
+- **Simplified Development**: Automatic tool registration using decorators
+- **Better Error Handling**: Built-in error management and logging
+- **Enhanced Performance**: Optimized request handling and caching
+- **Modern Architecture**: Clean separation between academic functionality and proxy server
+
+## important-instruction-reminders
+
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.

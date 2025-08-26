@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 
 import httpx
 
-from ..paper import Paper
+from ..models.paper import Paper
 from .base import PaperSource
 
 logger = logging.getLogger(__name__)
