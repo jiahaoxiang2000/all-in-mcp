@@ -57,12 +57,20 @@ uv pip install all-in-mcp
 
 ### Server Options
 
-You can run either server depending on your needs:
+The main proxy server supports multiple MCP backends through environment variables:
 
 ```bash
-# Main proxy server (recommended) - routes to all academic tools
-uv run all-in-mcp
+# Run with APaper academic tools enabled
+APAPER=true uv run all-in-mcp
 
+# Run with GitHub repository tools enabled
+GITHUB_REPO_MCP=true uv run all-in-mcp
+
+# Run with both backends enabled
+APAPER=true GITHUB_REPO_MCP=true uv run all-in-mcp
+
+# Run standalone APaper server (academic tools only)
+uv run apaper
 ```
 
 ### Integration with MCP Clients
@@ -77,7 +85,11 @@ Add the servers to your MCP client configuration:
     "all-in-mcp": {
       "type": "stdio",
       "command": "uv",
-      "args": ["run", "all-in-mcp"]
+      "args": ["run", "all-in-mcp"],
+      "env": {
+        "APAPER": "true",
+        "GITHUB_REPO_MCP": "true"
+      }
     }
   }
 }
@@ -89,8 +101,13 @@ Add the servers to your MCP client configuration:
 {
   "mcpServers": {
     "all-in-mcp": {
+      "type": "stdio",
       "command": "uv",
-      "args": ["run", "all-in-mcp"]
+      "args": ["run", "all-in-mcp"],
+      "env": {
+        "APAPER": "true",
+        "GITHUB_REPO_MCP": "true"
+      }
     }
   }
 }
@@ -103,9 +120,14 @@ Add the servers to your MCP client configuration:
 Use the official MCP Inspector to debug and test server functionality:
 
 ```bash
-# Debug the main proxy server
-npx @modelcontextprotocol/inspector uv run all-in-mcp
+# Debug the main proxy server with APaper tools
+APAPER=true npx @modelcontextprotocol/inspector uv run all-in-mcp
 
+# Debug with all backends enabled
+APAPER=true GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector uv run all-in-mcp
+
+# Debug standalone APaper server
+npx @modelcontextprotocol/inspector uv run apaper
 ```
 
 The MCP Inspector provides:

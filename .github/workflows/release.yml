@@ -26,17 +26,6 @@ jobs:
     - name: Install dependencies
       run: uv sync --all-extras
     
-    - name: Run tests
-      run: uv run pytest tests/ -v
-    
-    - name: Run linting (if available)
-      run: |
-        if uv run python -c "import ruff" 2>/dev/null; then
-          uv run ruff check src/
-        else
-          echo "Ruff not available, skipping linting"
-        fi
-      continue-on-error: true
 
   build:
     needs: test

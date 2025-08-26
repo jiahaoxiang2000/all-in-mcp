@@ -8,6 +8,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.1] - 2025-08-26
+
+### 📚 Documentation
+
+- 📝 docs: update README.md with environment variable configuration examples
+- 📝 docs: add comprehensive server options and MCP client integration examples
+
+---
+
 ## [0.3.0] - 2025-08-26
 
 ### 🚀 Features
