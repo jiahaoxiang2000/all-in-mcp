@@ -1,14 +1,22 @@
 # apaper/server.py
 """FastMCP-based academic paper research server."""
 
+import sys
+from pathlib import Path
+
+# Add the parent directory to path for absolute imports
+current_dir = Path(__file__).parent
+parent_dir = current_dir.parent
+sys.path.insert(0, str(parent_dir))
+
 from fastmcp import FastMCP
-from .platforms import (
+from apaper.platforms import (
     IACRSearcher,
     CryptoBibSearcher,
     CrossrefSearcher,
     GoogleScholarSearcher
 )
-from .utils.pdf_reader import read_pdf
+from apaper.utils.pdf_reader import read_pdf
 
 # Initialize FastMCP server
 mcp = FastMCP("apaper")
