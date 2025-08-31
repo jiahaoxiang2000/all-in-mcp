@@ -8,6 +8,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.2] - 2025-08-31
+
+### 🔧 Fixes & Improvements
+
+- 🔧 fix: enhance read_pdf_file function to accept both string and integer parameters for start_page and end_page
+
+---
+
 ## [0.3.1] - 2025-08-26
 
 ### 📚 Documentation

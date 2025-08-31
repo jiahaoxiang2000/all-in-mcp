@@ -372,8 +372,8 @@ def search_crossref_papers(
 @mcp.tool()
 def read_pdf_file(
     pdf_source: str,
-    start_page: int | None = None,
-    end_page: int | None = None,
+    start_page: int | str | None = None,
+    end_page: int | str | None = None,
 ) -> str:
     """
     Read and extract text content from a PDF file (local or online)
@@ -384,8 +384,20 @@ def read_pdf_file(
         end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
     """
     try:
-        result = read_pdf(pdf_source, start_page=start_page, end_page=end_page)
+        # Convert string parameters to integers if needed
+        start_page_int = None
+        end_page_int = None
+        
+        if start_page is not None:
+            start_page_int = int(start_page)
+        
+        if end_page is not None:
+            end_page_int = int(end_page)
+        
+        result = read_pdf(pdf_source, start_page=start_page_int, end_page=end_page_int)
         return result
+    except ValueError as e:
+        return f"Error: Invalid page number format. Please provide valid integers for start_page and end_page."
     except Exception as e:
         return f"Error reading PDF from {pdf_source}: {str(e)}"
 
