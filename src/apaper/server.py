@@ -33,8 +33,8 @@ def search_iacr_papers(
     query: str,
     max_results: int = 10,
     fetch_details: bool = True,
-    year_min: int | None = None,
-    year_max: int | None = None,
+    year_min: int | str | None = None,
+    year_max: int | str | None = None,
 ) -> str:
     """
     Search academic papers from IACR ePrint Archive
@@ -47,12 +47,22 @@ def search_iacr_papers(
         year_max: Maximum publication year (revised before)
     """
     try:
+        # Convert string parameters to integers if needed
+        year_min_int = None
+        year_max_int = None
+        
+        if year_min is not None:
+            year_min_int = int(year_min)
+        
+        if year_max is not None:
+            year_max_int = int(year_max)
+        
         papers = iacr_searcher.search(
             query,
             max_results=max_results,
             fetch_details=fetch_details,
-            year_min=year_min,
-            year_max=year_max,
+            year_min=year_min_int,
+            year_max=year_max_int,
         )
 
         if not papers:
@@ -85,6 +95,8 @@ def search_iacr_papers(
             result_text += "\n"
 
         return result_text
+    except ValueError as e:
+        return f"Error: Invalid year format. Please provide valid integers for year_min and year_max."
     except Exception as e:
         return f"Error searching IACR papers: {str(e)}"
 
@@ -113,8 +125,8 @@ def download_iacr_paper(paper_id: str, save_path: str = "./downloads") -> str:
 def read_iacr_paper(
     paper_id: str,
     save_path: str = "./downloads",
-    start_page: int | None = None,
-    end_page: int | None = None,
+    start_page: int | str | None = None,
+    end_page: int | str | None = None,
 ) -> str:
     """
     Read and extract text content from an IACR ePrint paper PDF
@@ -126,8 +138,18 @@ def read_iacr_paper(
         end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
     """
     try:
+        # Convert string parameters to integers if needed
+        start_page_int = None
+        end_page_int = None
+        
+        if start_page is not None:
+            start_page_int = int(start_page)
+        
+        if end_page is not None:
+            end_page_int = int(end_page)
+        
         result = iacr_searcher.read_paper(
-            paper_id, save_path, start_page=start_page, end_page=end_page
+            paper_id, save_path, start_page=start_page_int, end_page=end_page_int
         )
 
         if result.startswith("Error"):
@@ -142,6 +164,8 @@ def read_iacr_paper(
                 return truncated_result
             else:
                 return result
+    except ValueError as e:
+        return f"Error: Invalid page number format. Please provide valid integers for start_page and end_page."
     except Exception as e:
         return f"Error reading IACR paper: {str(e)}"
 
@@ -152,8 +176,8 @@ def search_cryptobib_papers(
     max_results: int = 10,
     return_bibtex: bool = False,
     force_download: bool = False,
-    year_min: int | None = None,
-    year_max: int | None = None,
+    year_min: int | str | None = None,
+    year_max: int | str | None = None,
 ) -> str:
     """
     Search CryptoBib bibliography database for cryptography papers
@@ -167,14 +191,24 @@ def search_cryptobib_papers(
         year_max: Maximum publication year (inclusive, optional)
     """
     try:
+        # Convert string parameters to integers if needed
+        year_min_int = None
+        year_max_int = None
+        
+        if year_min is not None:
+            year_min_int = int(year_min)
+        
+        if year_max is not None:
+            year_max_int = int(year_max)
+        
         if return_bibtex:
             # Return raw BibTeX entries
             bibtex_entries = cryptobib_searcher.search_bibtex(
                 query,
                 max_results,
                 force_download=force_download,
-                year_min=year_min,
-                year_max=year_max,
+                year_min=year_min_int,
+                year_max=year_max_int,
             )
 
             if not bibtex_entries:
@@ -200,8 +234,8 @@ def search_cryptobib_papers(
                 query,
                 max_results,
                 force_download=force_download,
-                year_min=year_min,
-                year_max=year_max,
+                year_min=year_min_int,
+                year_max=year_max_int,
             )
 
             if not papers:
@@ -232,6 +266,8 @@ def search_cryptobib_papers(
                 result_text += "\n"
 
             return result_text
+    except ValueError as e:
+        return f"Error: Invalid year format. Please provide valid integers for year_min and year_max."
     except Exception as e:
         return f"Error searching CryptoBib papers: {str(e)}"
 
@@ -240,8 +276,8 @@ def search_cryptobib_papers(
 def search_google_scholar_papers(
     query: str,
     max_results: int = 10,
-    year_low: int | None = None,
-    year_high: int | None = None,
+    year_low: int | str | None = None,
+    year_high: int | str | None = None,
 ) -> str:
     """
     Search academic papers from Google Scholar
@@ -253,11 +289,21 @@ def search_google_scholar_papers(
         year_high: Maximum publication year (optional)
     """
     try:
+        # Convert string parameters to integers if needed
+        year_low_int = None
+        year_high_int = None
+        
+        if year_low is not None:
+            year_low_int = int(year_low)
+        
+        if year_high is not None:
+            year_high_int = int(year_high)
+        
         papers = google_scholar_searcher.search(
             query,
             max_results=max_results,
-            year_low=year_low,
-            year_high=year_high,
+            year_low=year_low_int,
+            year_high=year_high_int,
         )
 
         if not papers:
@@ -293,6 +339,8 @@ def search_google_scholar_papers(
             result_text += "\n"
 
         return result_text
+    except ValueError as e:
+        return f"Error: Invalid year format. Please provide valid integers for year_low and year_high."
     except Exception as e:
         return f"Error searching Google Scholar: {str(e)}"
 
@@ -301,8 +349,8 @@ def search_google_scholar_papers(
 def search_crossref_papers(
     query: str,
     max_results: int = 10,
-    year_min: int | None = None,
-    year_max: int | None = None,
+    year_min: int | str | None = None,
+    year_max: int | str | None = None,
     sort_by: str = "relevance",
 ) -> str:
     """
@@ -316,11 +364,21 @@ def search_crossref_papers(
         sort_by: Sort order: relevance, published, indexed, updated (default: relevance)
     """
     try:
+        # Convert string parameters to integers if needed
+        year_min_int = None
+        year_max_int = None
+        
+        if year_min is not None:
+            year_min_int = int(year_min)
+        
+        if year_max is not None:
+            year_max_int = int(year_max)
+        
         papers = crossref_searcher.search(
             query,
             max_results=max_results,
-            year_min=year_min,
-            year_max=year_max,
+            year_min=year_min_int,
+            year_max=year_max_int,
             sort_by=sort_by,
         )
 
@@ -365,6 +423,8 @@ def search_crossref_papers(
             result_text += "\n"
 
         return result_text
+    except ValueError as e:
+        return f"Error: Invalid year format. Please provide valid integers for year_min and year_max."
     except Exception as e:
         return f"Error searching Crossref: {str(e)}"
 

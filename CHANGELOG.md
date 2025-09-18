@@ -8,6 +8,16 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.3] - 2025-09-18
+
+### 🔧 Fixes & Improvements
+
+- 🔧 fix: enhance MCP schema validation by accepting both string and integer parameters for year and page filters
+- 🔧 fix: update all search functions (IACR, CryptoBib, Google Scholar, Crossref) to handle flexible parameter types
+- 🔧 fix: add parameter conversion logic with proper error handling for invalid inputs
+
+---
+
 ## [0.3.2] - 2025-08-31
 
 ### 🔧 Fixes & Improvements
