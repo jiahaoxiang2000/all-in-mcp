@@ -178,10 +178,11 @@ def search_cryptobib_papers(
     force_download: bool = False,
     year_min: int | str | None = None,
     year_max: int | str | None = None,
+    conferences: list[str] | None = None,
 ) -> str:
     """
     Search CryptoBib bibliography database for cryptography papers
-    
+
     Args:
         query: Search query string (e.g., 'cryptography', 'lattice', 'homomorphic')
         max_results: Maximum number of papers to return (default: 10)
@@ -189,6 +190,7 @@ def search_cryptobib_papers(
         force_download: Force download the newest crypto.bib file (default: False)
         year_min: Minimum publication year (inclusive, optional)
         year_max: Maximum publication year (inclusive, optional)
+        conferences: List of conference labels to filter by (e.g., ['CRYPTO', 'EUROCRYPT'] or ['C', 'EC'])
     """
     try:
         # Convert string parameters to integers if needed
@@ -209,21 +211,32 @@ def search_cryptobib_papers(
                 force_download=force_download,
                 year_min=year_min_int,
                 year_max=year_max_int,
+                conferences=conferences,
             )
 
             if not bibtex_entries:
-                year_filter_msg = ""
+                filter_msg = ""
+                filters = []
                 if year_min or year_max:
-                    year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
-                    year_filter_msg = f" in year range{year_range}"
-                return f"No BibTeX entries found for query: {query}{year_filter_msg}"
+                    year_range = f"({year_min or 'earliest'}-{year_max or 'latest'})"
+                    filters.append(f"year range {year_range}")
+                if conferences:
+                    filters.append(f"conferences {conferences}")
+                if filters:
+                    filter_msg = f" with filters: {', '.join(filters)}"
+                return f"No BibTeX entries found for query: {query}{filter_msg}"
 
-            year_filter_msg = ""
+            filter_msg = ""
+            filters = []
             if year_min or year_max:
-                year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
-                year_filter_msg = f" in year range{year_range}"
-            
-            result_text = f"Found {len(bibtex_entries)} BibTeX entries for query '{query}'{year_filter_msg}:\n\n"
+                year_range = f"({year_min or 'earliest'}-{year_max or 'latest'})"
+                filters.append(f"year range {year_range}")
+            if conferences:
+                filters.append(f"conferences {conferences}")
+            if filters:
+                filter_msg = f" with filters: {', '.join(filters)}"
+
+            result_text = f"Found {len(bibtex_entries)} BibTeX entries for query '{query}'{filter_msg}:\n\n"
             for i, entry in enumerate(bibtex_entries, 1):
                 result_text += f"Entry {i}:\n```bibtex\n{entry}\n```\n\n"
 
@@ -236,21 +249,32 @@ def search_cryptobib_papers(
                 force_download=force_download,
                 year_min=year_min_int,
                 year_max=year_max_int,
+                conferences=conferences,
             )
 
             if not papers:
-                year_filter_msg = ""
+                filter_msg = ""
+                filters = []
                 if year_min or year_max:
-                    year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
-                    year_filter_msg = f" in year range{year_range}"
-                return f"No papers found for query: {query}{year_filter_msg}"
+                    year_range = f"({year_min or 'earliest'}-{year_max or 'latest'})"
+                    filters.append(f"year range {year_range}")
+                if conferences:
+                    filters.append(f"conferences {conferences}")
+                if filters:
+                    filter_msg = f" with filters: {', '.join(filters)}"
+                return f"No papers found for query: {query}{filter_msg}"
 
-            year_filter_msg = ""
+            filter_msg = ""
+            filters = []
             if year_min or year_max:
-                year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
-                year_filter_msg = f" in year range{year_range}"
-            
-            result_text = f"Found {len(papers)} CryptoBib papers for query '{query}'{year_filter_msg}:\n\n"
+                year_range = f"({year_min or 'earliest'}-{year_max or 'latest'})"
+                filters.append(f"year range {year_range}")
+            if conferences:
+                filters.append(f"conferences {conferences}")
+            if filters:
+                filter_msg = f" with filters: {', '.join(filters)}"
+
+            result_text = f"Found {len(papers)} CryptoBib papers for query '{query}'{filter_msg}:\n\n"
             for i, paper in enumerate(papers, 1):
                 result_text += f"{i}. **{paper.title}**\n"
                 result_text += f"   - Entry Key: {paper.paper_id}\n"

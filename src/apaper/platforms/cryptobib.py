@@ -25,6 +25,75 @@ class CryptoBibSearcher(PaperSource):
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
     ]
 
+    # Conference label mapping from full names to abbreviations
+    CONFERENCE_MAPPING: ClassVar[dict[str, str]] = {
+        "ACISP": "ACISP",
+        "ACM CCS": "CCS",
+        "CCS": "CCS",
+        "ACNS": "ACNS",
+        "AFRICACRYPT": "AFRICACRYPT",
+        "ASIACCS": "ASIACCS",
+        "ASIACRYPT": "AC",
+        "AC": "AC",
+        "CANS": "CANS",
+        "CHES": "CHES",
+        "COSADE": "COSADE",
+        "CQRE": "CQRE",
+        "CRYPTO": "C",
+        "C": "C",
+        "CSF": "CSF",
+        "CT-RSA": "RSA",
+        "RSA": "RSA",
+        "CiC": "CiC",
+        "DCC": "DCC",
+        "EPRINT": "EPRINT",
+        "ESORICS": "ESORICS",
+        "EUROCRYPT": "EC",
+        "EC": "EC",
+        "FC": "FC",
+        "FCW": "FCW",
+        "FOCS": "FOCS",
+        "FSE": "FSE",
+        "ICALP": "ICALP",
+        "ICICS": "ICICS",
+        "ICISC": "ICISC",
+        "ICITS": "ICITS",
+        "IEEE EuroSP": "EUROSP",
+        "EUROSP": "EUROSP",
+        "IEEE SP": "SP",
+        "SP": "SP",
+        "IMA": "IMA",
+        "INDOCRYPT": "INDOCRYPT",
+        "ISC": "ISC",
+        "ITC": "ITC",
+        "ITCS": "ITCS",
+        "IWSEC": "IWSEC",
+        "JC": "JC",
+        "JCEng": "JCEng",
+        "LATIN": "LATIN",
+        "LATINCRYPT": "LC",
+        "LC": "LC",
+        "NDSS": "NDSS",
+        "PAIRING": "PAIRING",
+        "PETS": "PETS",
+        "PKC": "PKC",
+        "PODC": "PODC",
+        "PQCRYPTO": "PQCRYPTO",
+        "PROVSEC": "PROVSEC",
+        "PoPETS": "PoPETS",
+        "SAC": "SAC",
+        "SCN": "SCN",
+        "SODA": "SODA",
+        "STOC": "STOC",
+        "TCC": "TCC",
+        "TCHES": "TCHES",
+        "TRUSTBUS": "TRUSTBUS",
+        "ToSC": "ToSC",
+        "USENIX": "USENIX",
+        "VIETCRYPT": "VIETCRYPT",
+        "WISA": "WISA",
+    }
+
     def __init__(self, cache_dir: str = "./downloads"):
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
@@ -53,7 +122,9 @@ class CryptoBibSearcher(PaperSource):
             response = self.session.get(self.CRYPTOBIB_BIB_URL, stream=True)
 
             if response.status_code != 200:
-                logger.error(f"Failed to download crypto.bib: HTTP {response.status_code}")
+                logger.error(
+                    f"Failed to download crypto.bib: HTTP {response.status_code}"
+                )
                 return False
 
             total_size = int(response.headers.get("content-length", 0))
@@ -88,7 +159,7 @@ class CryptoBibSearcher(PaperSource):
 
             # Extract fields using regex patterns
             field_dict = {}
-            
+
             # Pattern for quoted fields
             quoted_pattern = r'(\w+)\s*=\s*"([^"]*(?:[^"\\]|\\.)*)"'
             for match in re.finditer(quoted_pattern, bibtex_text, re.DOTALL):
@@ -107,12 +178,16 @@ class CryptoBibSearcher(PaperSource):
             # Parse fields
             title = re.sub(r"[{}]", "", field_dict.get("title", "")).strip()
             title = re.sub(r"\\[a-zA-Z]+", "", title).strip()
-            
+
             authors = []
             if "author" in field_dict:
                 author_text = re.sub(r"[{}]", "", field_dict["author"])
-                authors = [author.strip() for author in re.split(r"\s+and\s+", author_text) if author.strip()]
-            
+                authors = [
+                    author.strip()
+                    for author in re.split(r"\s+and\s+", author_text)
+                    if author.strip()
+                ]
+
             year = None
             if "year" in field_dict:
                 try:
@@ -151,8 +226,15 @@ class CryptoBibSearcher(PaperSource):
             logger.warning(f"Failed to parse BibTeX entry: {e}")
             return None
 
-    def search_bibtex(self, query: str, max_results: int = 10, force_download: bool = False, 
-                     year_min: int | None = None, year_max: int | None = None) -> list[str]:
+    def search_bibtex(
+        self,
+        query: str,
+        max_results: int = 10,
+        force_download: bool = False,
+        year_min: int | None = None,
+        year_max: int | None = None,
+        conferences: list[str] | None = None,
+    ) -> list[str]:
         """Search CryptoBib and return raw BibTeX entries"""
         bibtex_entries = []
 
@@ -179,7 +261,11 @@ class CryptoBibSearcher(PaperSource):
 
                         if brace_count <= 0:
                             if query_lower in current_entry.lower():
-                                if self._entry_matches_year_range(current_entry, year_min, year_max):
+                                if self._entry_matches_year_range(
+                                    current_entry, year_min, year_max
+                                ) and self._entry_matches_conferences(
+                                    current_entry, conferences
+                                ):
                                     bibtex_entries.append(current_entry.strip())
                                     if len(bibtex_entries) >= max_results:
                                         break
@@ -193,14 +279,27 @@ class CryptoBibSearcher(PaperSource):
 
         return bibtex_entries[:max_results]
 
-    def search(self, query: str, max_results: int = 10, return_bibtex: bool = False,
-               force_download: bool = False, year_min: int | None = None, 
-               year_max: int | None = None) -> list[Paper]:
+    def search(
+        self,
+        query: str,
+        max_results: int = 10,
+        return_bibtex: bool = False,
+        force_download: bool = False,
+        year_min: int | None = None,
+        year_max: int | None = None,
+        conferences: list[str] | None = None,
+    ) -> list[Paper]:
         """Search CryptoBib bibliography"""
         papers = []
         try:
-            bibtex_entries = self.search_bibtex(query, max_results, force_download=force_download,
-                                              year_min=year_min, year_max=year_max)
+            bibtex_entries = self.search_bibtex(
+                query,
+                max_results,
+                force_download=force_download,
+                year_min=year_min,
+                year_max=year_max,
+                conferences=conferences,
+            )
             for bibtex_text in bibtex_entries:
                 paper = self._parse_bibtex_entry(bibtex_text)
                 if paper:
@@ -213,30 +312,77 @@ class CryptoBibSearcher(PaperSource):
         """CryptoBib doesn't provide PDF downloads"""
         return "Error: CryptoBib is a bibliography database and doesn't provide PDF downloads"
 
-    def read_paper(self, paper_id: str, save_path: str = "./downloads", 
-                  start_page: int | None = None, end_page: int | None = None) -> str:
+    def read_paper(
+        self,
+        paper_id: str,
+        save_path: str = "./downloads",
+        start_page: int | None = None,
+        end_page: int | None = None,
+    ) -> str:
         """CryptoBib doesn't provide paper content reading"""
         return "Error: CryptoBib is a bibliography database and doesn't provide paper content"
 
-    def _entry_matches_year_range(self, bibtex_entry: str, year_min: int | None, 
-                                 year_max: int | None) -> bool:
+    def _entry_matches_year_range(
+        self, bibtex_entry: str, year_min: int | None, year_max: int | None
+    ) -> bool:
         """Check if a BibTeX entry falls within the specified year range"""
         if year_min is None and year_max is None:
             return True
 
         try:
-            year_match = re.search(r'year\s*=\s*(?:["{\s]*)?(\d{4})', bibtex_entry, re.IGNORECASE)
+            year_match = re.search(
+                r'year\s*=\s*(?:["{\s]*)?(\d{4})', bibtex_entry, re.IGNORECASE
+            )
             if not year_match:
                 return False
 
             entry_year = int(year_match.group(1))
-            
+
             if year_min is not None and entry_year < year_min:
                 return False
             if year_max is not None and entry_year > year_max:
                 return False
-            
+
             return True
+
+        except (ValueError, AttributeError):
+            return False
+
+    def _entry_matches_conferences(
+        self, bibtex_entry: str, conferences: list[str] | None
+    ) -> bool:
+        """Check if a BibTeX entry belongs to one of the specified conferences"""
+        if conferences is None or not conferences:
+            return True
+
+        try:
+            # Extract the entry ID from the BibTeX entry
+            entry_match = re.match(r"@\w+{([^,]+),", bibtex_entry, re.IGNORECASE)
+            if not entry_match:
+                return False
+
+            entry_id = entry_match.group(1).strip()
+
+            # Extract conference label from entry ID (part before the colon)
+            if ":" not in entry_id:
+                return False
+
+            entry_conference = entry_id.split(":")[0].upper()
+
+            # Normalize conference names and check if any match
+            normalized_conferences = set()
+            for conf in conferences:
+                conf_upper = conf.upper()
+                # Add both the original conference name and its mapping
+                normalized_conferences.add(conf_upper)
+                if conf_upper in self.CONFERENCE_MAPPING:
+                    normalized_conferences.add(self.CONFERENCE_MAPPING[conf_upper])
+                # Also add reverse mapping
+                for full_name, abbrev in self.CONFERENCE_MAPPING.items():
+                    if abbrev.upper() == conf_upper:
+                        normalized_conferences.add(full_name.upper())
+
+            return entry_conference in normalized_conferences
 
         except (ValueError, AttributeError):
             return False
