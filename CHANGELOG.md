@@ -8,6 +8,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.3.4] - 2025-09-21
+
+### ✨ Features
+
+- ✨ feat: add conference filtering support to CryptoBib search
+
+---
+
 ## [0.3.3] - 2025-09-18
 
 ### 🔧 Fixes & Improvements
