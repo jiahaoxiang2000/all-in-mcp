@@ -8,6 +8,45 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.4.0] - 2025-09-21
+
+### 🚀 Major Refactor
+
+- ♻️ refactor: replace CryptoBib with DBLP integration
+  - Add DBLP platform (src/apaper/platforms/dblp.py) for searching computer science bibliography
+  - Implement search_dblp_papers tool with query, year, and venue filtering
+  - Remove CryptoBib platform (src/apaper/platforms/cryptobib.py) - CryptoBib entries are sourced from DBLP
+  - Remove Crossref platform (src/apaper/platforms/crossref.py) to simplify architecture
+  - Update documentation to reflect DBLP integration
+
+- 🔧 remove: remove redundant PDF reading functionality
+  - Delete src/apaper/utils/pdf_reader.py (MCP clients have built-in PDF tools)
+  - Remove read_pdf_file tool from APaper server
+  - Remove read_content method from Paper model
+  - Clean up imports and dependencies
+
+- 📝 docs: update all documentation files
+  - Update README.md tools table (show only DBLP, remove PDF tools)
+  - Update CLAUDE.md platform structure
+  - Update docs/api.md (replace CryptoBib section with DBLP)
+  - Update docs/slide/intro.typ
+  - Delete docs/cryptobib.md
+
+- 🧪 tests: update test suite
+  - Update test_fastmcp_server.py imports
+  - Remove read_pdf import from models test
+
+### ⚡ Performance
+
+- Net reduction of -1,337 lines of code
+- Simplified APaper module from 1,927 lines to 590 lines
+
+### 📋 Result: Simplified APaper module
+
+The APaper module is now streamlined with only core bibliography search tools (IACR, DBLP, Google Scholar), removing redundant functionality that's available in MCP clients.
+
+---
+
 ## [0.3.4] - 2025-09-21
 
 ### ✨ Features
