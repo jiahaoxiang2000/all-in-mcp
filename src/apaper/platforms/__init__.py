@@ -2,14 +2,12 @@
 
 from .base import PaperSource
 from .iacr import IACRSearcher
-from .cryptobib import CryptoBibSearcher
-from .crossref import CrossrefSearcher
+from .dblp import DBLPSearcher
 from .google_scholar import GoogleScholarSearcher
 
 __all__ = [
     "PaperSource",
-    "IACRSearcher", 
-    "CryptoBibSearcher",
-    "CrossrefSearcher",
-    "GoogleScholarSearcher"
+    "IACRSearcher",
+    "DBLPSearcher",
+    "GoogleScholarSearcher",
 ]

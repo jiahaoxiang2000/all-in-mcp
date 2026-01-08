@@ -159,7 +159,7 @@ APAPER=true GITHUB_REPO_MCP=true pipx run all-in-mcp
 #pause
 
 *v0.2.x* (June-August 2025): 📚 Added multiple academic platforms
-- CryptoBib, Crossref, Google Scholar integration
+- DBLP, Google Scholar integration
 - PDF processing and year filtering capabilities
 
 #pause

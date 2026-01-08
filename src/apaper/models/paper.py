@@ -2,8 +2,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from ..utils.pdf_reader import read_pdf
-
 
 @dataclass
 class Paper:
@@ -64,19 +62,3 @@ class Paper:
             "references": self.references,
             "extra": self.extra,
         }
-
-    def read_content(self) -> str:
-        """
-        Read the full text content of this paper's PDF.
-
-        Returns:
-            str: Extracted text content from the paper's PDF
-
-        Raises:
-            ValueError: If no PDF URL is available
-            Exception: If PDF cannot be read or processed
-        """
-        if not self.pdf_url:
-            raise ValueError("No PDF URL available for this paper")
-
-        return read_pdf(self.pdf_url)

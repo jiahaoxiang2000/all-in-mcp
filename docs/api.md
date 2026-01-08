@@ -158,60 +158,57 @@ Found 3 Google Scholar papers for query 'deep learning transformers' in year ran
 - Rate limiting may apply for frequent requests
 - Results may vary based on geographic location
 
-## CryptoBib Bibliography Search
+## DBLP Bibliography Search
 
-### search-cryptobib-papers
+### search-dblp-papers
 
-Search CryptoBib bibliography database for cryptography papers. CryptoBib is a comprehensive BibTeX database of cryptography-related academic papers.
+Search DBLP computer science bibliography database for papers. DBLP is a comprehensive bibliography database for computer science publications.
 
 **Parameters:**
 
-- `query` (string, required): Search query string (e.g., 'cryptography', 'lattice', 'homomorphic')
+- `query` (string, required): Search query string (supports boolean 'and'/'or' operators)
 - `max_results` (integer, optional): Maximum number of results to return (default: 10)
-- `return_bibtex` (boolean, optional): Whether to return raw BibTeX entries (default: false)
-- `force_download` (boolean, optional): Force download the newest crypto.bib file (default: false)
+- `year_from` (integer, optional): Lower bound for publication year
+- `year_to` (integer, optional): Upper bound for publication year
+- `venue_filter` (string, optional): Case-insensitive substring filter for venues (e.g., 'ICLR', 'NeurIPS')
+- `include_bibtex` (boolean, optional): Whether to include BibTeX entries in results (default: false)
 
 **Returns:**
 
-- List of papers with metadata or raw BibTeX entries
+- List of papers with metadata (title, authors, venue, year, DOI, URL, and optionally BibTeX)
 
 **Example:**
 
 ```json
 {
-  "name": "search-cryptobib-papers",
+  "name": "search-dblp-papers",
   "arguments": {
-    "query": "lattice cryptography",
+    "query": "attention transformer",
     "max_results": 5,
-    "return_bibtex": true,
-    "force_download": false
+    "year_from": 2017,
+    "include_bibtex": true
   }
 }
 ```
 
 **Response:**
 
-````text
-Found 5 BibTeX entries for query 'lattice cryptography':
+```text
+Found 5 DBLP papers for query 'attention transformer' with filters: year range (2017-latest):
 
-Entry 1:
-```bibtex
-@InProceedings{CRYPTO:RegLyr05,
-  author = "Oded Regev and Ricky Steinfeld",
-  title = "Learning With Errors over Rings",
-  booktitle = "CRYPTO 2005",
-  year = 2005,
-  ...
-}
-````
-
-**Important Notes:**
-
-- **First Use**: On first use, the tool will download the crypto.bib file (~50MB) and cache it locally in the `./downloads` directory
-- **Caching**: Subsequent searches use the cached file unless `force_download` is set to true
-- **BibTeX Retrieval**: To get specific BibTeX entries, use the `search-cryptobib-papers` tool with `return_bibtex=true` and a specific search query
-- **Content**: The crypto.bib file contains thousands of cryptography-related papers from major conferences and journals
-- **Performance**: Local file searching is much faster than streaming searches
+1. **Attention Is All You Need**
+   - DBLP Key: conf/nips/VaswaniSPUJGKP17
+   - Authors: Ashish Vaswani, Noam Shazeer, Niki Parmar, ...
+   - Venue: NeurIPS
+   - Year: 2017
+   - DOI: 10.5555/3295222.3295349
+   - BibTeX:
+   @inproceedings{VaswaniSPUJGKP17,
+     author = {Ashish Vaswani and ...},
+     title = {Attention Is All You Need},
+      ...
+    }
+```
 
 ## Error Handling
 

@@ -35,10 +35,8 @@ Both servers expose academic paper search tools as FastMCP endpoints with automa
 | **Academic Research**     | `apaper_search_iacr_papers`             | Search academic papers from IACR ePrint Archive                | APaper          |
 |                           | `apaper_download_iacr_paper`            | Download PDF of an IACR ePrint paper                           | APaper          |
 |                           | `apaper_read_iacr_paper`                | Read and extract text content from an IACR ePrint paper PDF    | APaper          |
-| **Bibliography Search**   | `apaper_search_cryptobib_papers`        | Search CryptoBib bibliography database for cryptography papers | APaper          |
-| **Cross-platform Search** | `apaper_search_crossref_papers`         | Search academic papers from Crossref database                  | APaper          |
-|                           | `apaper_search_google_scholar_papers`   | Search academic papers across disciplines with citation data   | APaper          |
-| **PDF Processing**        | `apaper_read_pdf_file`                  | Read and extract text from local and online PDF files          | APaper          |
+| **Bibliography Search**   | `apaper_search_dblp_papers`             | Search DBLP computer science bibliography database             | APaper          |
+| **Cross-platform Search** | `apaper_search_google_scholar_papers`   | Search academic papers across disciplines with citation data   | APaper          |
 | **GitHub Repository**     | `github-repo-mcp_getRepoAllDirectories` | Get all directories from a GitHub repository                   | GitHub-Repo-MCP |
 |                           | `github-repo-mcp_getRepoDirectories`    | Get directories from a specific path in GitHub repository      | GitHub-Repo-MCP |
 |                           | `github-repo-mcp_getRepoFile`           | Get file content from GitHub repository                        | GitHub-Repo-MCP |

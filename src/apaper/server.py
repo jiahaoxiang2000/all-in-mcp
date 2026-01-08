@@ -12,19 +12,16 @@ sys.path.insert(0, str(parent_dir))
 from fastmcp import FastMCP
 from apaper.platforms import (
     IACRSearcher,
-    CryptoBibSearcher,
-    CrossrefSearcher,
-    GoogleScholarSearcher
+    DBLPSearcher,
+    GoogleScholarSearcher,
 )
-from apaper.utils.pdf_reader import read_pdf
 
 # Initialize FastMCP server
 mcp = FastMCP("apaper")
 
 # Initialize searchers
 iacr_searcher = IACRSearcher()
-cryptobib_searcher = CryptoBibSearcher(cache_dir="./downloads")
-crossref_searcher = CrossrefSearcher()
+dblp_searcher = DBLPSearcher()
 google_scholar_searcher = GoogleScholarSearcher()
 
 
@@ -38,7 +35,7 @@ def search_iacr_papers(
 ) -> str:
     """
     Search academic papers from IACR ePrint Archive
-    
+
     Args:
         query: Search query string (e.g., 'cryptography', 'secret sharing')
         max_results: Maximum number of papers to return (default: 10)
@@ -50,13 +47,13 @@ def search_iacr_papers(
         # Convert string parameters to integers if needed
         year_min_int = None
         year_max_int = None
-        
+
         if year_min is not None:
             year_min_int = int(year_min)
-        
+
         if year_max is not None:
             year_max_int = int(year_max)
-        
+
         papers = iacr_searcher.search(
             query,
             max_results=max_results,
@@ -77,9 +74,11 @@ def search_iacr_papers(
         if year_min or year_max:
             year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
             year_filter_msg = f" in year range{year_range}"
-        
-        result_text = f"Found {len(papers)} IACR papers for query '{query}'{year_filter_msg}:\n\n"
-        
+
+        result_text = (
+            f"Found {len(papers)} IACR papers for query '{query}'{year_filter_msg}:\n\n"
+        )
+
         for i, paper in enumerate(papers, 1):
             result_text += f"{i}. **{paper.title}**\n"
             result_text += f"   - Paper ID: {paper.paper_id}\n"
@@ -105,14 +104,14 @@ def search_iacr_papers(
 def download_iacr_paper(paper_id: str, save_path: str = "./downloads") -> str:
     """
     Download PDF of an IACR ePrint paper
-    
+
     Args:
         paper_id: IACR paper ID (e.g., '2009/101')
         save_path: Directory to save the PDF (default: './downloads')
     """
     try:
         result = iacr_searcher.download_pdf(paper_id, save_path)
-        
+
         if result.startswith(("Error", "Failed")):
             return f"Download failed: {result}"
         else:
@@ -130,7 +129,7 @@ def read_iacr_paper(
 ) -> str:
     """
     Read and extract text content from an IACR ePrint paper PDF
-    
+
     Args:
         paper_id: IACR paper ID (e.g., '2009/101')
         save_path: Directory where the PDF is/will be saved (default: './downloads')
@@ -141,13 +140,13 @@ def read_iacr_paper(
         # Convert string parameters to integers if needed
         start_page_int = None
         end_page_int = None
-        
+
         if start_page is not None:
             start_page_int = int(start_page)
-        
+
         if end_page is not None:
             end_page_int = int(end_page)
-        
+
         result = iacr_searcher.read_paper(
             paper_id, save_path, start_page=start_page_int, end_page=end_page_int
         )
@@ -171,129 +170,91 @@ def read_iacr_paper(
 
 
 @mcp.tool()
-def search_cryptobib_papers(
+def search_dblp_papers(
     query: str,
     max_results: int = 10,
-    return_bibtex: bool = False,
-    force_download: bool = False,
-    year_min: int | str | None = None,
-    year_max: int | str | None = None,
-    conferences: list[str] | None = None,
+    year_from: int | str | None = None,
+    year_to: int | str | None = None,
+    venue_filter: str | None = None,
+    include_bibtex: bool = False,
 ) -> str:
     """
-    Search CryptoBib bibliography database for cryptography papers
+    Search DBLP computer science bibliography database for papers
 
     Args:
-        query: Search query string (e.g., 'cryptography', 'lattice', 'homomorphic')
+        query: Search query string (supports boolean 'and'/'or' operators)
         max_results: Maximum number of papers to return (default: 10)
-        return_bibtex: Whether to return raw BibTeX entries (default: False)
-        force_download: Force download the newest crypto.bib file (default: False)
-        year_min: Minimum publication year (inclusive, optional)
-        year_max: Maximum publication year (inclusive, optional)
-        conferences: List of conference labels to filter by (e.g., ['CRYPTO', 'EUROCRYPT'] or ['C', 'EC'])
+        year_from: Lower bound for publication year (optional)
+        year_to: Upper bound for publication year (optional)
+        venue_filter: Case-insensitive substring filter for venues (e.g., 'ICLR', 'NeurIPS')
+        include_bibtex: Whether to include BibTeX entries in results (default: False)
     """
     try:
         # Convert string parameters to integers if needed
-        year_min_int = None
-        year_max_int = None
-        
-        if year_min is not None:
-            year_min_int = int(year_min)
-        
-        if year_max is not None:
-            year_max_int = int(year_max)
-        
-        if return_bibtex:
-            # Return raw BibTeX entries
-            bibtex_entries = cryptobib_searcher.search_bibtex(
-                query,
-                max_results,
-                force_download=force_download,
-                year_min=year_min_int,
-                year_max=year_max_int,
-                conferences=conferences,
-            )
+        year_from_int = None
+        year_to_int = None
 
-            if not bibtex_entries:
-                filter_msg = ""
-                filters = []
-                if year_min or year_max:
-                    year_range = f"({year_min or 'earliest'}-{year_max or 'latest'})"
-                    filters.append(f"year range {year_range}")
-                if conferences:
-                    filters.append(f"conferences {conferences}")
-                if filters:
-                    filter_msg = f" with filters: {', '.join(filters)}"
-                return f"No BibTeX entries found for query: {query}{filter_msg}"
+        if year_from is not None:
+            year_from_int = int(year_from)
 
+        if year_to is not None:
+            year_to_int = int(year_to)
+
+        results = dblp_searcher.search(
+            query,
+            max_results=max_results,
+            year_from=year_from_int,
+            year_to=year_to_int,
+            venue_filter=venue_filter,
+            include_bibtex=include_bibtex,
+        )
+
+        if not results:
             filter_msg = ""
             filters = []
-            if year_min or year_max:
-                year_range = f"({year_min or 'earliest'}-{year_max or 'latest'})"
+            if year_from or year_to:
+                year_range = f"({year_from or 'earliest'}-{year_to or 'latest'})"
                 filters.append(f"year range {year_range}")
-            if conferences:
-                filters.append(f"conferences {conferences}")
+            if venue_filter:
+                filters.append(f"venue '{venue_filter}'")
             if filters:
                 filter_msg = f" with filters: {', '.join(filters)}"
+            return f"No papers found for query: {query}{filter_msg}"
 
-            result_text = f"Found {len(bibtex_entries)} BibTeX entries for query '{query}'{filter_msg}:\n\n"
-            for i, entry in enumerate(bibtex_entries, 1):
-                result_text += f"Entry {i}:\n```bibtex\n{entry}\n```\n\n"
+        filter_msg = ""
+        filters = []
+        if year_from or year_to:
+            year_range = f"({year_from or 'earliest'}-{year_to or 'latest'})"
+            filters.append(f"year range {year_range}")
+        if venue_filter:
+            filters.append(f"venue '{venue_filter}'")
+        if filters:
+            filter_msg = f" with filters: {', '.join(filters)}"
 
-            return result_text
-        else:
-            # Return parsed Paper objects
-            papers = cryptobib_searcher.search(
-                query,
-                max_results,
-                force_download=force_download,
-                year_min=year_min_int,
-                year_max=year_max_int,
-                conferences=conferences,
-            )
+        result_text = (
+            f"Found {len(results)} DBLP papers for query '{query}'{filter_msg}:\n\n"
+        )
+        for i, result in enumerate(results, 1):
+            result_text += f"{i}. **{result.get('title', 'Untitled')}**\n"
+            result_text += f"   - DBLP Key: {result.get('dblp_key', '')}\n"
+            result_text += f"   - Authors: {', '.join(result.get('authors', []))}\n"
+            if result.get("venue"):
+                result_text += f"   - Venue: {result['venue']}\n"
+            if result.get("year"):
+                result_text += f"   - Year: {result['year']}\n"
+            if result.get("doi"):
+                result_text += f"   - DOI: {result['doi']}\n"
+            if result.get("url"):
+                result_text += f"   - URL: {result['url']}\n"
+            if include_bibtex and result.get("bibtex"):
+                result_text += f"   - BibTeX:\n```bibtex\n{result['bibtex']}\n```\n"
+            result_text += "\n"
 
-            if not papers:
-                filter_msg = ""
-                filters = []
-                if year_min or year_max:
-                    year_range = f"({year_min or 'earliest'}-{year_max or 'latest'})"
-                    filters.append(f"year range {year_range}")
-                if conferences:
-                    filters.append(f"conferences {conferences}")
-                if filters:
-                    filter_msg = f" with filters: {', '.join(filters)}"
-                return f"No papers found for query: {query}{filter_msg}"
-
-            filter_msg = ""
-            filters = []
-            if year_min or year_max:
-                year_range = f"({year_min or 'earliest'}-{year_max or 'latest'})"
-                filters.append(f"year range {year_range}")
-            if conferences:
-                filters.append(f"conferences {conferences}")
-            if filters:
-                filter_msg = f" with filters: {', '.join(filters)}"
-
-            result_text = f"Found {len(papers)} CryptoBib papers for query '{query}'{filter_msg}:\n\n"
-            for i, paper in enumerate(papers, 1):
-                result_text += f"{i}. **{paper.title}**\n"
-                result_text += f"   - Entry Key: {paper.paper_id}\n"
-                result_text += f"   - Authors: {', '.join(paper.authors)}\n"
-                if paper.extra and "venue" in paper.extra:
-                    result_text += f"   - Venue: {paper.extra['venue']}\n"
-                if paper.published_date and paper.published_date.year > 1900:
-                    result_text += f"   - Year: {paper.published_date.year}\n"
-                if paper.doi:
-                    result_text += f"   - DOI: {paper.doi}\n"
-                if paper.extra and "pages" in paper.extra:
-                    result_text += f"   - Pages: {paper.extra['pages']}\n"
-                result_text += "\n"
-
-            return result_text
-    except ValueError as e:
-        return f"Error: Invalid year format. Please provide valid integers for year_min and year_max."
+        return result_text
+    except ValueError:
+        return "Error: Invalid year format. Please provide valid integers for year_from and year_to."
     except Exception as e:
-        return f"Error searching CryptoBib papers: {str(e)}"
+        return f"Error searching DBLP: {str(e)}"
 
 
 @mcp.tool()
@@ -305,7 +266,7 @@ def search_google_scholar_papers(
 ) -> str:
     """
     Search academic papers from Google Scholar
-    
+
     Args:
         query: Search query string (e.g., 'machine learning', 'neural networks')
         max_results: Maximum number of papers to return (default: 10)
@@ -316,13 +277,13 @@ def search_google_scholar_papers(
         # Convert string parameters to integers if needed
         year_low_int = None
         year_high_int = None
-        
+
         if year_low is not None:
             year_low_int = int(year_low)
-        
+
         if year_high is not None:
             year_high_int = int(year_high)
-        
+
         papers = google_scholar_searcher.search(
             query,
             max_results=max_results,
@@ -367,123 +328,6 @@ def search_google_scholar_papers(
         return f"Error: Invalid year format. Please provide valid integers for year_low and year_high."
     except Exception as e:
         return f"Error searching Google Scholar: {str(e)}"
-
-
-@mcp.tool()
-def search_crossref_papers(
-    query: str,
-    max_results: int = 10,
-    year_min: int | str | None = None,
-    year_max: int | str | None = None,
-    sort_by: str = "relevance",
-) -> str:
-    """
-    Search academic papers from Crossref database
-    
-    Args:
-        query: Search query string (e.g., 'quantum computing', 'machine learning')
-        max_results: Maximum number of papers to return (default: 10)
-        year_min: Minimum publication year (optional)
-        year_max: Maximum publication year (optional)
-        sort_by: Sort order: relevance, published, indexed, updated (default: relevance)
-    """
-    try:
-        # Convert string parameters to integers if needed
-        year_min_int = None
-        year_max_int = None
-        
-        if year_min is not None:
-            year_min_int = int(year_min)
-        
-        if year_max is not None:
-            year_max_int = int(year_max)
-        
-        papers = crossref_searcher.search(
-            query,
-            max_results=max_results,
-            year_min=year_min_int,
-            year_max=year_max_int,
-            sort_by=sort_by,
-        )
-
-        if not papers:
-            year_filter_msg = ""
-            if year_min or year_max:
-                year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
-                year_filter_msg = f" in year range{year_range}"
-            return f"No papers found for query: {query}{year_filter_msg}"
-
-        year_filter_msg = ""
-        if year_min or year_max:
-            year_range = f" ({year_min or 'earliest'}-{year_max or 'latest'})"
-            year_filter_msg = f" in year range{year_range}"
-
-        result_text = f"Found {len(papers)} Crossref papers for query '{query}'{year_filter_msg}:\n\n"
-        for i, paper in enumerate(papers, 1):
-            result_text += f"{i}. **{paper.title}**\n"
-            result_text += f"   - Authors: {', '.join(paper.authors)}\n"
-            if paper.doi:
-                result_text += f"   - DOI: {paper.doi}\n"
-            if paper.citations > 0:
-                result_text += f"   - Citations: {paper.citations}\n"
-            if paper.published_date and paper.published_date.year > 1900:
-                result_text += f"   - Year: {paper.published_date.year}\n"
-            if paper.extra and paper.extra.get("journal"):
-                result_text += f"   - Journal: {paper.extra['journal']}\n"
-            if paper.extra and paper.extra.get("volume"):
-                result_text += f"   - Volume: {paper.extra['volume']}\n"
-            if paper.extra and paper.extra.get("pages"):
-                result_text += f"   - Pages: {paper.extra['pages']}\n"
-            if paper.url:
-                result_text += f"   - URL: {paper.url}\n"
-            if paper.abstract:
-                # Truncate abstract for readability
-                abstract_preview = (
-                    paper.abstract[:300] + "..."
-                    if len(paper.abstract) > 300
-                    else paper.abstract
-                )
-                result_text += f"   - Abstract: {abstract_preview}\n"
-            result_text += "\n"
-
-        return result_text
-    except ValueError as e:
-        return f"Error: Invalid year format. Please provide valid integers for year_min and year_max."
-    except Exception as e:
-        return f"Error searching Crossref: {str(e)}"
-
-
-@mcp.tool()
-def read_pdf_file(
-    pdf_source: str,
-    start_page: int | str | None = None,
-    end_page: int | str | None = None,
-) -> str:
-    """
-    Read and extract text content from a PDF file (local or online)
-    
-    Args:
-        pdf_source: Path to local PDF file or URL to online PDF
-        start_page: Starting page number (1-indexed, inclusive). Defaults to 1.
-        end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
-    """
-    try:
-        # Convert string parameters to integers if needed
-        start_page_int = None
-        end_page_int = None
-        
-        if start_page is not None:
-            start_page_int = int(start_page)
-        
-        if end_page is not None:
-            end_page_int = int(end_page)
-        
-        result = read_pdf(pdf_source, start_page=start_page_int, end_page=end_page_int)
-        return result
-    except ValueError as e:
-        return f"Error: Invalid page number format. Please provide valid integers for start_page and end_page."
-    except Exception as e:
-        return f"Error reading PDF from {pdf_source}: {str(e)}"
 
 
 def main():

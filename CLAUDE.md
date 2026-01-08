@@ -26,12 +26,8 @@ src/apaper/
 │   ├── __init__.py
 │   ├── base.py           # Abstract PaperSource class
 │   ├── iacr.py          # IACR ePrint Archive integration
-│   ├── cryptobib.py     # Cryptography bibliography database
-│   ├── crossref.py      # Crossref academic database
+│   ├── dblp.py          # DBLP computer science bibliography
 │   └── google_scholar.py # Google Scholar search
-└── utils/
-    ├── __init__.py
-    └── pdf_reader.py     # PDF processing utilities
 ```
 
 ### All-in-MCP Proxy Structure
@@ -52,8 +48,7 @@ src/all_in_mcp/
 ### Available Academic Platforms
 
 - **IACR**: `apaper/platforms/iacr.py` - IACR ePrint Archive integration
-- **CryptoBib**: `apaper/platforms/cryptobib.py` - Cryptography bibliography database
-- **Crossref**: `apaper/platforms/crossref.py` - Crossref academic database
+- **DBLP**: `apaper/platforms/dblp.py` - DBLP computer science bibliography with BibTeX export
 - **Google Scholar**: `apaper/platforms/google_scholar.py` - Google Scholar search
 
 ## Development Commands
