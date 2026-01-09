@@ -8,6 +8,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.4.1] - 2026-01-09
+
+### 🔧 Fixes & Improvements
+
+- 🔧 fix: optimize DBLP BibTeX return format
+  - Improve BibTeX output formatting for better readability and compatibility
+  - Enhance data structure handling for DBLP search results
+
+- 🔧 fix: resolve PDF read function crash issue
+  - Fix critical crash in pdf_read function that was causing failures
+  - Add proper error handling and validation for PDF operations
+
+---
+
 ## [0.4.0] - 2026-01-08
 
 ### 🚀 Major Refactor

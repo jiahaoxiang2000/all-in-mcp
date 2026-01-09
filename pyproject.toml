@@ -1,6 +1,6 @@
 [project]
 name = "all-in-mcp"
-version = "0.4.0"
+version = "0.4.1"
 description = "An MCP (Model Context Protocol) server providing daily-use utility functions and academic paper search capabilities"
 readme = "README.md"
 license = { text = "MIT" }
@@ -43,11 +43,7 @@ Documentation = "https://github.com/jiahaoxiang2000/all-in-mcp/tree/main/docs"
 Issues = "https://github.com/jiahaoxiang2000/all-in-mcp/issues"
 
 [project.optional-dependencies]
-dev = [
-    "ruff>=0.1.0",
-    "mypy>=1.5.0",
-    "build>=1.0.0",
-]
+dev = ["ruff>=0.1.0", "mypy>=1.5.0", "build>=1.0.0"]
 
 [build-system]
 requires = ["hatchling"]
