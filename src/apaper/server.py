@@ -231,6 +231,15 @@ def search_dblp_papers(
         if filters:
             filter_msg = f" with filters: {', '.join(filters)}"
 
+        # If include_bibtex is True, results only contain BibTeX entries
+        if include_bibtex:
+            result_text = f"Found {len(results)} DBLP BibTeX entries for query '{query}'{filter_msg}:\n\n"
+            for i, result in enumerate(results, 1):
+                result_text += f"{i}. DBLP Key: {result.get('dblp_key', 'Unknown')}\n"
+                result_text += f"```bibtex\n{result.get('bibtex', '')}\n```\n\n"
+            return result_text
+
+        # Otherwise, return full paper metadata
         result_text = (
             f"Found {len(results)} DBLP papers for query '{query}'{filter_msg}:\n\n"
         )
@@ -246,8 +255,6 @@ def search_dblp_papers(
                 result_text += f"   - DOI: {result['doi']}\n"
             if result.get("url"):
                 result_text += f"   - URL: {result['url']}\n"
-            if include_bibtex and result.get("bibtex"):
-                result_text += f"   - BibTeX:\n```bibtex\n{result['bibtex']}\n```\n"
             result_text += "\n"
 
         return result_text
