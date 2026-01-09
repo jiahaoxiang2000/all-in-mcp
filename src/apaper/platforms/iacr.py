@@ -7,10 +7,8 @@ from typing import ClassVar
 
 import requests
 from bs4 import BeautifulSoup
-from pypdf import PdfReader
 
 from ..models.paper import Paper
-from ..utils.pdf_reader import read_pdf
 from .base import PaperSource
 
 logger = logging.getLogger(__name__)
@@ -194,7 +192,9 @@ class IACRSearcher(PaperSource):
                 if len(papers) >= max_results:
                     break
 
-                logger.info(f"Processing paper {i+1}/{min(len(results), max_results)}")
+                logger.info(
+                    f"Processing paper {i + 1}/{min(len(results), max_results)}"
+                )
                 paper = self._parse_paper(item, fetch_details=fetch_details)
                 if paper:
                     papers.append(paper)
@@ -232,42 +232,6 @@ class IACRSearcher(PaperSource):
         except Exception as e:
             logger.error(f"PDF download error: {e}")
             return f"Error downloading PDF: {e}"
-
-    def read_paper(self, paper_id: str, save_path: str = "./downloads", start_page: int | None = None, end_page: int | None = None) -> str:
-        """
-        Download and extract text from IACR paper PDF
-
-        Args:
-            paper_id: IACR paper ID
-            save_path: Directory to save downloaded PDF
-            start_page: Starting page number (1-indexed, inclusive). Defaults to 1.
-            end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
-
-        Returns:
-            str: Extracted text from the PDF or error message
-        """
-        try:
-            # First get paper details to get the PDF URL
-            paper = self.get_paper_details(paper_id)
-            if not paper or not paper.pdf_url:
-                return f"Error: Could not find PDF URL for paper {paper_id}"
-
-            # Use the read_pdf function to extract text
-            text = read_pdf(paper.pdf_url, start_page, end_page)
-
-            # Add paper metadata at the beginning
-            metadata = f"Title: {paper.title}\n"
-            metadata += f"Authors: {', '.join(paper.authors)}\n"
-            metadata += f"Published Date: {paper.published_date}\n"
-            metadata += f"URL: {paper.url}\n"
-            metadata += f"PDF URL: {paper.pdf_url}\n"
-            metadata += "=" * 80 + "\n\n"
-
-            return metadata + text
-
-        except Exception as e:
-            logger.error(f"Error reading paper: {e}")
-            return f"Error reading paper: {e}"
 
     def get_paper_details(self, paper_id: str) -> Paper | None:
         """

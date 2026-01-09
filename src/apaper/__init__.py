@@ -6,8 +6,8 @@ Provides tools for searching papers from multiple academic platforms (IACR,
 DBLP, Crossref, Google Scholar) and processing PDF documents.
 """
 
-from .models.paper import Paper, read_pdf
+from .models.paper import Paper
 from .server import main
 
 __version__ = "0.1.0"
-__all__ = ["Paper", "read_pdf", "main"]
+__all__ = ["Paper", "main"]

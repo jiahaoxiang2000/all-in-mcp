@@ -121,55 +121,6 @@ def download_iacr_paper(paper_id: str, save_path: str = "./downloads") -> str:
 
 
 @mcp.tool()
-def read_iacr_paper(
-    paper_id: str,
-    save_path: str = "./downloads",
-    start_page: int | str | None = None,
-    end_page: int | str | None = None,
-) -> str:
-    """
-    Read and extract text content from an IACR ePrint paper PDF
-
-    Args:
-        paper_id: IACR paper ID (e.g., '2009/101')
-        save_path: Directory where the PDF is/will be saved (default: './downloads')
-        start_page: Starting page number (1-indexed, inclusive). Defaults to 1.
-        end_page: Ending page number (1-indexed, inclusive). Defaults to last page.
-    """
-    try:
-        # Convert string parameters to integers if needed
-        start_page_int = None
-        end_page_int = None
-
-        if start_page is not None:
-            start_page_int = int(start_page)
-
-        if end_page is not None:
-            end_page_int = int(end_page)
-
-        result = iacr_searcher.read_paper(
-            paper_id, save_path, start_page=start_page_int, end_page=end_page_int
-        )
-
-        if result.startswith("Error"):
-            return result
-        else:
-            # Truncate very long text for display
-            if len(result) > 5000:
-                truncated_result = (
-                    result[:5000]
-                    + f"\n\n... [Text truncated. Full text is {len(result)} characters long]"
-                )
-                return truncated_result
-            else:
-                return result
-    except ValueError as e:
-        return f"Error: Invalid page number format. Please provide valid integers for start_page and end_page."
-    except Exception as e:
-        return f"Error reading IACR paper: {str(e)}"
-
-
-@mcp.tool()
 def search_dblp_papers(
     query: str,
     max_results: int = 10,
