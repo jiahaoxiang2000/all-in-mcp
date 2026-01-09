@@ -102,9 +102,15 @@ class DBLPSearcher:
 
         # Fetch BibTeX entries if requested
         if include_bibtex:
+            bibtex_results = []
             for result in filtered_results:
                 if "dblp_key" in result and result["dblp_key"]:
-                    result["bibtex"] = self.fetch_bibtex_entry(result["dblp_key"])
+                    bibtex = self.fetch_bibtex_entry(result["dblp_key"])
+                    if bibtex:
+                        bibtex_results.append(
+                            {"bibtex": bibtex, "dblp_key": result["dblp_key"]}
+                        )
+            return bibtex_results
 
         return filtered_results
 
