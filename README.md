@@ -1,6 +1,6 @@
 # All-in-MCP
 
-A FastMCP-based Model Context Protocol (MCP) server providing academic paper search and PDF processing utilities. Features a modular architecture with both proxy and standalone server capabilities.
+A FastMCP-based Model Context Protocol (MCP) server providing academic paper search, web search, and PDF processing utilities. Features a modular architecture with both proxy and standalone server capabilities.
 
 - [_All-in-MCP Introduction Slides_](docs/slide/intro.pdf)
 - [**Introduction Video on Bilibili**](https://www.bilibili.com/video/BV1ZcvNzSEX5/)
@@ -17,16 +17,17 @@ A FastMCP-based Model Context Protocol (MCP) server providing academic paper sea
 
 ## Architecture
 
-All-in-MCP uses a modern **FastMCP architecture** with two main components:
+All-in-MCP uses a modern **FastMCP architecture** with three main components:
 
-1. **🔄 All-in-MCP Proxy Server**: Main server that routes requests to academic tools
+1. **🔄 All-in-MCP Proxy Server**: Main server that routes requests to academic tools and web search
 2. **📚 APaper Module**: Isolated academic research server with specialized paper search tools
+3. **🔍 Qwen Search Module**: Web search server powered by Qwen/Dashscope API with SSE-based MCP
 
 This design provides better modularity, performance, and scalability.
 
 ## Features
 
-Both servers expose academic paper search tools as FastMCP endpoints with automatic tool registration:
+All servers expose search tools as FastMCP endpoints with automatic tool registration:
 
 ### Available Tools
 
@@ -37,6 +38,7 @@ Both servers expose academic paper search tools as FastMCP endpoints with automa
 |                           | `apaper_read_iacr_paper`                | Read and extract text content from an IACR ePrint paper PDF    | APaper          |
 | **Bibliography Search**   | `apaper_search_dblp_papers`             | Search DBLP computer science bibliography database             | APaper          |
 | **Cross-platform Search** | `apaper_search_google_scholar_papers`   | Search academic papers across disciplines with citation data   | APaper          |
+| **Web Search**           | `qwen_search_web_search`                | Search the web using Qwen/Dashscope API                        | Qwen Search      |
 | **GitHub Repository**     | `github-repo-mcp_getRepoAllDirectories` | Get all directories from a GitHub repository                   | GitHub-Repo-MCP |
 |                           | `github-repo-mcp_getRepoDirectories`    | Get directories from a specific path in GitHub repository      | GitHub-Repo-MCP |
 |                           | `github-repo-mcp_getRepoFile`           | Get file content from GitHub repository                        | GitHub-Repo-MCP |
@@ -69,6 +71,8 @@ Add the servers to your MCP client configuration:
       "args": ["run", "all-in-mcp"],
       "env": {
         "APAPER": "true",
+        "QWEN_SEARCH": "true",
+        "DASHSCOPE_API_KEY": "your_api_key_here",
         "GITHUB_REPO_MCP": "true"
       }
     }
@@ -87,6 +91,8 @@ Add the servers to your MCP client configuration:
       "args": ["run", "all-in-mcp"],
       "env": {
         "APAPER": "true",
+        "QWEN_SEARCH": "true",
+        "DASHSCOPE_API_KEY": "your_api_key_here",
         "GITHUB_REPO_MCP": "true"
       }
     }
@@ -102,17 +108,23 @@ The main proxy server supports multiple MCP backends through environment variabl
 # Run with APaper academic tools enabled
 APAPER=true pipx run all-in-mcp
 
+# Run with Qwen Search web search enabled
+QWEN_SEARCH=true DASHSCOPE_API_KEY=your_api_key_here pipx run all-in-mcp
+
 # Run with GitHub repository tools enabled
 GITHUB_REPO_MCP=true pipx run all-in-mcp
 
-# Run with both backends enabled
-APAPER=true GITHUB_REPO_MCP=true pipx run all-in-mcp
+# Run with all backends enabled
+APAPER=true QWEN_SEARCH=true DASHSCOPE_API_KEY=your_api_key_here GITHUB_REPO_MCP=true pipx run all-in-mcp
 
 # Run standalone APaper server (academic tools only)
 pipx run apaper
+
+# Run standalone Qwen Search server (web search only)
+DASHSCOPE_API_KEY=your_api_key_here pipx run qwen-search
 ```
 
-> **Note**: If you have the package installed globally, you can also run directly: `all-in-mcp` or `apaper`
+> **Note**: If you have the package installed globally, you can also run directly: `all-in-mcp` or `qwen-search`
 
 ## Debugging & Testing
 
@@ -146,10 +158,10 @@ APAPER=true npx @modelcontextprotocol/inspector uv run all-in-mcp
 GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector uv run all-in-mcp
 
 # Debug all-in-mcp with all backends enabled
-APAPER=true GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector uv run all-in-mcp
+APAPER=true QWEN_SEARCH=true DASHSCOPE_API_KEY=your_api_key_here GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector uv run all-in-mcp
 
 # Debug Qwen Search server
-QWEN_SEARCH=true npx @modelcontextprotocol/inspector uv run qwen-search
+DASHSCOPE_API_KEY=your_api_key_here npx @modelcontextprotocol/inspector uv run qwen-search
 ```
 
 The MCP Inspector provides:
@@ -180,6 +192,7 @@ uv sync --extra dev
 uv run python tests/test_fastmcp_server.py
 uv run python tests/test_apaper_iacr.py
 uv run python tests/test_apaper_pdf.py
+uv run python tests/test_qwen_search.py
 ```
 
 </details>
