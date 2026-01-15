@@ -36,8 +36,7 @@ src/apaper/
 ```
 src/qwen_search/
 ├── __init__.py              # Qwen Search package entry point
-├── server.py               # FastMCP-based Qwen Search server
-└── client.py               # SSE client for Dashscope API
+└── server.py               # FastMCP-based Qwen Search proxy server
 ```
 
 ### All-in-MCP Proxy Structure
@@ -51,8 +50,8 @@ src/all_in_mcp/
 ### FastMCP Server Implementation
 
 - **APaper Server**: `src/apaper/server.py` - Dedicated academic research server using FastMCP decorators
-- **Qwen Search Server**: `src/qwen_search/server.py` - Web search server using Dashscope API with SSE
-- **Proxy Server**: `src/all_in_mcp/server.py` - Main proxy server that imports and exposes APaper and Qwen Search functionality
+- **Qwen Search Server**: `src/qwen_search/server.py` - Proxy server that uses MCP SDK to connect to Dashscope SSE-based MCP server
+- **Proxy Server**: `src/all_in_mcp/server.py` - Main proxy server that connects to APaper (stdio), Qwen Search (SSE), and other MCP servers
 - **Tool Registration**: Uses FastMCP `@app.tool()` decorators for automatic tool registration
 - **Data Model**: `src/apaper/models/paper.py` - Standardized `Paper` dataclass
 
@@ -150,6 +149,20 @@ Additionally, the Qwen Search module requires:
 - **Better Error Handling**: Built-in error management and logging
 - **Enhanced Performance**: Optimized request handling and caching
 - **Modern Architecture**: Clean separation between academic functionality and proxy server
+
+### SSE-based MCP Integration
+
+The Qwen Search module demonstrates FastMCP's ability to connect to external SSE-based MCP servers:
+
+- **Dashscope Integration**: Direct SSE connection to Dashscope's WebSearch MCP server
+- **MCP SDK**: Uses FastMCP's built-in SSE transport to handle the connection
+- **No Custom Parsing**: Leverages MCP SDK's robust SSE parsing instead of manual implementation
+- **Seamless Tool Forwarding**: Automatically exposes Dashscope's search tools through the proxy
+
+To use Qwen Search:
+1. Set `QWEN_SEARCH=true` to enable the server
+2. Set `DASHSCOPE_API_KEY` with your Dashscope API key
+3. The proxy server automatically connects to Dashscope's SSE endpoint and forwards search requests
 
 ## important-instruction-reminders
 

@@ -39,13 +39,15 @@ if _str_to_bool(os.getenv("APAPER", "false")):
         "args": [str(apaper_server_path)],
     }
 
-# Qwen Search server (web search)
+# Qwen Search server (web search) - Direct SSE connection to Dashscope
 if _str_to_bool(os.getenv("QWEN_SEARCH", "false")):
-    config["mcpServers"]["qwen_search"] = {
-        "type": "stdio",
-        "command": "python",
-        "args": [str(qwen_search_server_path)],
-    }
+    api_key = os.getenv("DASHSCOPE_API_KEY", "")
+    if api_key:
+        config["mcpServers"]["qwen_search"] = {
+            "type": "sse",
+            "url": "https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/sse",
+            "headers": {"Authorization": f"Bearer {api_key}"},
+        }
 
 # GitHub repository MCP server
 if _str_to_bool(os.getenv("GITHUB_REPO_MCP", "false")):
