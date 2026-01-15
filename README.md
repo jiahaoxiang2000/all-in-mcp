@@ -131,6 +131,27 @@ APAPER=true GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector pipx run al
 npx @modelcontextprotocol/inspector pipx run apaper
 ```
 
+#### Local Development with uv
+
+When developing locally, use `uv run` to debug specific MCP functions:
+
+```bash
+# Debug APaper server (academic tools)
+npx @modelcontextprotocol/inspector uv run apaper
+
+# Debug all-in-mcp proxy with APaper enabled
+APAPER=true npx @modelcontextprotocol/inspector uv run all-in-mcp
+
+# Debug all-in-mcp proxy with GitHub repo tools enabled
+GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector uv run all-in-mcp
+
+# Debug all-in-mcp with all backends enabled
+APAPER=true GITHUB_REPO_MCP=true npx @modelcontextprotocol/inspector uv run all-in-mcp
+
+# Debug Qwen Search server
+QWEN_SEARCH=true npx @modelcontextprotocol/inspector uv run qwen-search
+```
+
 The MCP Inspector provides:
 
 - 🔍 **Interactive Tool Testing**: Test all available tools with real parameters
