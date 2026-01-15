@@ -61,6 +61,15 @@ class TestFastMCPServer(unittest.TestCase):
         except ImportError as e:
             self.fail(f"Failed to import APaper models: {e}")
 
+    def test_qwen_search_import(self):
+        """Test that qwen_search server can be imported"""
+        try:
+            import qwen_search.server
+
+            self.assertTrue(True, "Qwen Search server imported successfully")
+        except ImportError as e:
+            self.fail(f"Failed to import Qwen Search server: {e}")
+
     def test_fastmcp_tools_defined(self):
         """Test that FastMCP tools are properly defined"""
         try:

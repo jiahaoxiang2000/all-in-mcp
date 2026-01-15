@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-All-in-MCP is a FastMCP-based Model Context Protocol (MCP) proxy server that provides academic paper search and PDF processing utilities. The project has been restructured into two main components:
+All-in-MCP is a FastMCP-based Model Context Protocol (MCP) proxy server that provides academic paper search, web search, and PDF processing utilities. The project has been restructured into three main components:
 
 1. **APaper**: An isolated academic research module with tools for searching papers from multiple academic platforms
-2. **All-in-MCP Proxy**: A FastMCP proxy server that forwards requests to APaper and other MCP servers
+2. **Qwen Search**: A web search module using the Qwen/Dashscope API
+3. **All-in-MCP Proxy**: A FastMCP proxy server that forwards requests to APaper, Qwen Search, and other MCP servers
 
 The system uses the FastMCP framework for simplified MCP server development with automatic tool registration, enhanced features, and better performance.
 
@@ -30,6 +31,15 @@ src/apaper/
 │   └── google_scholar.py # Google Scholar search
 ```
 
+### Qwen Search Module Structure
+
+```
+src/qwen_search/
+├── __init__.py              # Qwen Search package entry point
+├── server.py               # FastMCP-based Qwen Search server
+└── client.py               # SSE client for Dashscope API
+```
+
 ### All-in-MCP Proxy Structure
 
 ```
@@ -41,7 +51,8 @@ src/all_in_mcp/
 ### FastMCP Server Implementation
 
 - **APaper Server**: `src/apaper/server.py` - Dedicated academic research server using FastMCP decorators
-- **Proxy Server**: `src/all_in_mcp/server.py` - Main proxy server that imports and exposes APaper functionality
+- **Qwen Search Server**: `src/qwen_search/server.py` - Web search server using Dashscope API with SSE
+- **Proxy Server**: `src/all_in_mcp/server.py` - Main proxy server that imports and exposes APaper and Qwen Search functionality
 - **Tool Registration**: Uses FastMCP `@app.tool()` decorators for automatic tool registration
 - **Data Model**: `src/apaper/models/paper.py` - Standardized `Paper` dataclass
 
@@ -73,6 +84,9 @@ uv run python tests/test_fastmcp_server.py
 uv run python tests/test_apaper_iacr.py
 uv run python tests/test_apaper_pdf.py
 
+# Run Qwen Search tests
+uv run python tests/test_qwen_search.py
+
 # Using make commands (if available)
 make test
 make test-verbose
@@ -87,9 +101,13 @@ uv run all-in-mcp
 # Run the isolated APaper server directly
 uv run apaper
 
+# Run the isolated Qwen Search server directly
+uv run qwen-search
+
 # Test server imports
 uv run python -c "import all_in_mcp.server; print('Proxy server OK')"
 uv run python -c "import apaper.server; print('APaper server OK')"
+uv run python -c "import qwen_search.server; print('Qwen Search server OK')"
 ```
 
 ### Building and Distribution
@@ -103,11 +121,24 @@ make build
 make clean
 ```
 
+## Environment Variables
+
+To enable/disable MCP servers in the all-in-mcp proxy server, set the following environment variables:
+
+- `APAPER=true` (default: false): Enable APaper academic search server
+- `QWEN_SEARCH=true` (default: false): Enable Qwen/Dashscope web search server
+- `GITHUB_REPO_MCP=true` (default: false): Enable GitHub repository MCP server
+
+Additionally, the Qwen Search module requires:
+
+- `DASHSCOPE_API_KEY`: Your Dashscope API key for accessing the Qwen Search API
+
 ## Testing Strategy
 
 - **Unit Tests**: Located in `tests/` directory
 - **New Test Structure**:
   - `test_apaper_*`: Tests for APaper module functionality
+  - `test_qwen_search.py`: Tests for Qwen Search module functionality
   - `test_fastmcp_server.py`: Tests for FastMCP server functionality
 - **Test Execution**: Use `uv run python` for individual test files
 

@@ -9,6 +9,7 @@ progress reporting, and logging.
 Environment variables to enable MCP servers (all disabled by default):
 - ENABLE_APAPER=true: Enable APaper academic search server
 - ENABLE_GITHUB_REPO_MCP=true: Enable GitHub repository MCP server
+- ENABLE_QWEN_SEARCH=true: Enable Qwen/Dashscope web search server
 """
 
 import os
@@ -21,9 +22,10 @@ def _str_to_bool(value: str) -> bool:
     return value.lower() in ("true", "1", "yes", "on")
 
 
-# Get the path to the APaper server
+# Get paths to the MCP servers
 current_dir = Path(__file__).parent
 apaper_server_path = current_dir.parent / "apaper" / "server.py"
+qwen_search_server_path = current_dir.parent / "qwen_search" / "server.py"
 
 # Build configuration based on environment variables
 # All MCP servers are disabled by default
@@ -37,6 +39,14 @@ if _str_to_bool(os.getenv("APAPER", "false")):
         "args": [str(apaper_server_path)],
     }
 
+# Qwen Search server (web search)
+if _str_to_bool(os.getenv("QWEN_SEARCH", "false")):
+    config["mcpServers"]["qwen_search"] = {
+        "type": "stdio",
+        "command": "python",
+        "args": [str(qwen_search_server_path)],
+    }
+
 # GitHub repository MCP server
 if _str_to_bool(os.getenv("GITHUB_REPO_MCP", "false")):
     config["mcpServers"]["github-repo-mcp"] = {
@@ -46,7 +56,12 @@ if _str_to_bool(os.getenv("GITHUB_REPO_MCP", "false")):
     }
 
 # Create proxy server from config (supports multiple backends)
-app = FastMCP.as_proxy(config, name="All-in-MCP Proxy")
+# If no servers are enabled, create a minimal proxy server
+if not config["mcpServers"]:
+    # Create a basic FastMCP server instead of a proxy when no servers are enabled
+    app = FastMCP("All-in-MCP Proxy")
+else:
+    app = FastMCP.as_proxy(config, name="All-in-MCP Proxy")
 
 
 def main():
