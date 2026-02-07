@@ -14,8 +14,8 @@ Environment variables to enable MCP servers (all disabled by default):
 
 import logging
 import os
+import sys
 from importlib.metadata import version
-from pathlib import Path
 
 from fastmcp import FastMCP
 
@@ -27,21 +27,17 @@ def _str_to_bool(value: str) -> bool:
     return value.lower() in ("true", "1", "yes", "on")
 
 
-# Get paths to the MCP servers
-current_dir = Path(__file__).parent
-apaper_server_path = current_dir.parent / "apaper" / "server.py"
-qwen_search_server_path = current_dir.parent / "qwen_search" / "server.py"
-
 # Build configuration based on environment variables
 # All MCP servers are disabled by default
 config = {"mcpServers": {}}
 
 # APaper server (academic research tools)
+# Uses sys.executable to ensure it runs in the same Python environment (works in pipx, uv, etc.)
 if _str_to_bool(os.getenv("APAPER", "false")):
     config["mcpServers"]["apaper"] = {
         "type": "stdio",
-        "command": "python",
-        "args": [str(apaper_server_path)],
+        "command": sys.executable,
+        "args": ["-m", "apaper"],
     }
 
 # Qwen Search server (web search) - Direct SSE connection to Dashscope
