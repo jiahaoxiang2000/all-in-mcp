@@ -1,6 +1,6 @@
 [project]
 name = "all-in-mcp"
-version = "0.4.2"
+version = "0.4.3"
 description = "An MCP (Model Context Protocol) server providing daily-use utility functions and academic paper search capabilities"
 readme = "README.md"
 license = { text = "MIT" }
@@ -48,6 +48,9 @@ dev = ["ruff>=0.1.0", "mypy>=1.5.0", "build>=1.0.0"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build]
+sources = ["src"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/all_in_mcp", "src/apaper", "src/qwen_search"]
