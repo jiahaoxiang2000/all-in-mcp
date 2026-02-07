@@ -12,9 +12,14 @@ Environment variables to enable MCP servers (all disabled by default):
 - ENABLE_QWEN_SEARCH=true: Enable Qwen/Dashscope web search server
 """
 
+import logging
 import os
+from importlib.metadata import version
 from pathlib import Path
+
 from fastmcp import FastMCP
+
+logger = logging.getLogger(__name__)
 
 
 def _str_to_bool(value: str) -> bool:
@@ -68,6 +73,8 @@ else:
 
 def main():
     """Main entry point for the all-in-mcp proxy server."""
+    pkg_version = version("all-in-mcp")
+    logger.info("all-in-mcp v%s starting", pkg_version)
     app.run()
 
 
